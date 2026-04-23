@@ -3,9 +3,10 @@
 ## Token holen (jedes Mal beim Einloggen)
 
 1. Salesforce in Chrome öffnen
-2. **⚡ Salesforce Inspector** Icon in der Chrome-Leiste klicken
-3. Im Popup auf **Copy** neben "Session Id" klicken
-4. Im Tool einfügen → **Verbinden**
+2. **🔍 Salesforce Inspector Reloaded** Icon in der Chrome-Leiste klicken
+3. Im Popup auf den Tab **"Org"** klicken
+4. Auf **Copy** neben "Session Id" klicken
+5. Im Tool einfügen → **Verbinden**
 
 > Token läuft nach ca. 2h ab (Session-abhängig). Einfach neu kopieren.
 

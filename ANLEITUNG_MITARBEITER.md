@@ -17,15 +17,17 @@ Du brauchst:
 
 **1.1** Öffne Salesforce in Chrome (wie gewohnt).
 
-**1.2** Klicke auf das **⚡ Salesforce Inspector** Icon oben rechts in Chrome  
-*(kleines gelbes Blitz-Symbol in der Symbolleiste)*
+**1.2** Klicke auf das **🔍 Salesforce Inspector Reloaded** Icon oben rechts in Chrome  
+*(Lupen-Symbol in der Chrome-Symbolleiste)*
 
-**1.3** Im Popup das auf **"Copy"** neben "Session Id" klicken.  
+**1.3** Im Popup auf den Tab **"Org"** klicken (oben rechts in der Tab-Leiste).
+
+**1.4** Auf **"Copy"** neben "Session Id" klicken.  
 → Der Token ist jetzt kopiert (du siehst nichts, aber er ist in der Zwischenablage)
 
 **1.4** Tool öffnen: `https://wolfster.github.io/qwello-site-import/`
 
-**1.5** In das Feld "Session Token" klicken → **Strg+V** (Windows) oder **Cmd+V** (Mac) → **Verbinden** klicken
+**1.5** Tool öffnen, in das Feld "Session Token" klicken → **Strg+V** (Windows) oder **Cmd+V** (Mac) → **Verbinden** klicken
 
 > ⚠ Der Token läuft nach ca. 2 Stunden ab. Wenn das Tool meldet "Token ungültig" → einfach Schritt 1.2–1.5 wiederholen.
 

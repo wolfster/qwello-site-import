@@ -279,7 +279,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 
       <div class="guide-steps">
 
-        <!-- Step 1: Chrome öffnen -->
+        <!-- Step 1: Inspector-Icon klicken -->
         <div class="guide-step">
           <div class="guide-step-num">1</div>
           <div class="guide-step-body">
@@ -292,31 +292,37 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
               <div class="mock-toolbar-url">sitetracker-qwello.my.salesforce.com</div>
               <div class="mock-toolbar-ext">
                 <div style="width:22px;height:22px;background:#444;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">⋯</div>
-                <div class="mock-ext-icon">⚡</div>
+                <div class="mock-ext-icon" style="font-size:11px;font-weight:700;letter-spacing:-1px;">🔍</div>
               </div>
             </div>
-            <div class="guide-step-label">Salesforce in Chrome öffnen → auf das <strong>⚡ Salesforce Inspector</strong> Icon rechts oben in der Browser-Leiste klicken</div>
+            <div class="guide-step-label">Salesforce in Chrome öffnen → auf das <strong>🔍 Salesforce Inspector Reloaded</strong> Icon rechts oben in Chrome klicken</div>
           </div>
         </div>
 
-        <!-- Step 2: Copy klicken -->
+        <!-- Step 2: Org-Tab klicken -->
         <div class="guide-step">
           <div class="guide-step-num">2</div>
           <div class="guide-step-body">
             <div class="mock-popup">
               <div class="mock-popup-header">
-                <div class="mock-popup-logo">S</div>
-                <span class="mock-popup-title">Salesforce Inspector</span>
+                <div class="mock-popup-logo" style="font-size:9px;">🔍</div>
+                <span class="mock-popup-title">Salesforce Inspector Reloaded</span>
+              </div>
+              <div style="display:flex;border-bottom:1px solid #2c2c2c;padding:0 10px;gap:0;">
+                <div style="padding:5px 8px;font-size:9px;color:#555;border-bottom:2px solid transparent;">Objects</div>
+                <div style="padding:5px 8px;font-size:9px;color:#555;border-bottom:2px solid transparent;">Users</div>
+                <div style="padding:5px 8px;font-size:9px;color:#555;border-bottom:2px solid transparent;">Shortcuts</div>
+                <div style="padding:5px 8px;font-size:9px;color:var(--accent);font-weight:700;border-bottom:2px solid var(--accent);">Org ←</div>
               </div>
               <div class="mock-popup-body">
                 <div class="mock-session-row">
                   <span class="mock-session-label">Session Id</span>
-                  <span class="mock-session-value">00D5g000000XXXXX!ARsAQBnm…</span>
+                  <span class="mock-session-value">00D5g000000XXXXX!ARsAQ…</span>
                   <button class="mock-copy-btn">Copy</button>
                 </div>
               </div>
             </div>
-            <div class="guide-step-label">Im Popup auf <strong>Copy</strong> neben "Session Id" klicken — der Token ist jetzt in der Zwischenablage</div>
+            <div class="guide-step-label">Im Popup auf den Tab <strong>"Org"</strong> klicken → dann auf <strong>Copy</strong> neben "Session Id" — Token ist jetzt kopiert</div>
           </div>
         </div>
 
