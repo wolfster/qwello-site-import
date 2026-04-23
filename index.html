@@ -717,7 +717,7 @@ async function startLogin() {
     const res = await fetch(`${SF_DOMAIN}/services/oauth2/token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ grant_type: 'device', client_id: CLIENT_ID, scope: 'api id' })
+      body: new URLSearchParams({ grant_type: 'device', client_id: CLIENT_ID })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error_description || data.error);
