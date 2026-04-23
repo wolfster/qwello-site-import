@@ -1,661 +1,232 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Qwello Site Import</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
-
-  :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222222;
-    --border: #2e2e2e;
-    --border2: #3a3a3a;
-    --text: #f0f0f0;
-    --text2: #888;
-    --text3: #555;
-    --accent: #f0b429;
-    --accent2: #e09b00;
-    --error: #e05252;
-    --success: #4caf88;
-    --info: #5b9cf6;
-    --radius: 8px;
-    --radius-lg: 12px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    min-height: 100vh;
-  }
-
-  /* LOGIN SCREEN */
-  #login-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 2rem;
-  }
-
-  .login-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 3rem;
-    width: 100%;
-    max-width: 420px;
-    text-align: center;
-  }
-
-  .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 2rem;
-  }
-
-  .logo-mark {
-    width: 36px;
-    height: 36px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 16px;
-    color: #000;
-  }
-
-  .logo-text {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-
-  .login-card h1 {
-    font-size: 22px;
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.4px;
-  }
-
-  .login-card p {
-    color: var(--text2);
-    font-size: 13px;
-    margin-bottom: 2rem;
-    line-height: 1.6;
-  }
-
-  .btn-login {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 12px 20px;
-    background: var(--accent);
-    color: #000;
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
-  .btn-login:hover { background: var(--accent2); }
-
-  .login-note {
-    margin-top: 1.5rem;
-    font-size: 12px;
-    color: var(--text3);
-    line-height: 1.6;
-  }
-
-  /* APP SCREEN */
-  #app-screen { display: none; }
-
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .user-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text2);
-  }
-
-  .user-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--success);
-    border-radius: 50%;
-  }
-
-  .btn-logout {
-    background: none;
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    padding: 5px 12px;
-    border-radius: 6px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-logout:hover { border-color: var(--text2); color: var(--text); }
-
-  .main {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 2.5rem 2rem;
-  }
-
-  .page-header {
-    margin-bottom: 2.5rem;
-  }
-
-  .page-header h2 {
-    font-size: 24px;
-    font-weight: 500;
-    letter-spacing: -0.5px;
-    margin-bottom: 0.4rem;
-  }
-
-  .page-header p {
-    color: var(--text2);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  /* STEPS */
-  .steps {
-    display: flex;
-    gap: 0;
-    margin-bottom: 2.5rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
-
-  .step {
-    flex: 1;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-right: 1px solid var(--border);
-    opacity: 0.4;
-    transition: opacity 0.2s;
-  }
-  .step:last-child { border-right: none; }
-  .step.active { opacity: 1; }
-  .step.done { opacity: 0.7; }
-
-  .step-num {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--border2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text2);
-    flex-shrink: 0;
-  }
-  .step.active .step-num {
-    background: var(--accent);
-    color: #000;
-  }
-  .step.done .step-num {
-    background: var(--success);
-    color: #000;
-  }
-
-  .step-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text2);
-  }
-  .step.active .step-label { color: var(--text); }
-
-  /* FORM */
-  .form-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 1rem;
-    overflow: hidden;
-  }
-
-  .section-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .section-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: var(--surface2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-  }
-
-  .section-title {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  .section-subtitle {
-    font-size: 11px;
-    color: var(--text3);
-    margin-left: auto;
-  }
-
-  .form-grid {
-    padding: 20px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .form-grid.single { grid-template-columns: 1fr; }
-  .form-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
-  .span2 { grid-column: span 2; }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text2);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .req {
-    color: var(--accent);
-    font-size: 13px;
-    line-height: 1;
-  }
-
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  select,
-  textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    padding: 9px 12px;
-    transition: border-color 0.15s;
-    width: 100%;
-    outline: none;
-    -webkit-appearance: none;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--accent);
-  }
-
-  input.error, select.error { border-color: var(--error); }
-
-  select {
-    cursor: pointer;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-    appearance: none;
-  }
-
-  textarea { resize: vertical; min-height: 72px; }
-
-  .field-hint {
-    font-size: 11px;
-    color: var(--text3);
-    line-height: 1.5;
-  }
-
-  .error-msg {
-    font-size: 11px;
-    color: var(--error);
-    display: none;
-  }
-
-  .field.has-error .error-msg { display: block; }
-  .field.has-error input, .field.has-error select { border-color: var(--error); }
-
-  /* LOOKUP FIELDS */
-  .lookup-wrap {
-    position: relative;
-  }
-
-  .lookup-input {
-    padding-right: 80px !important;
-  }
-
-  .lookup-status {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    pointer-events: none;
-  }
-
-  .lookup-results {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    z-index: 50;
-    max-height: 200px;
-    overflow-y: auto;
-    display: none;
-  }
-
-  .lookup-results.open { display: block; }
-
-  .lookup-item {
-    padding: 9px 12px;
-    cursor: pointer;
-    transition: background 0.1s;
-    border-bottom: 1px solid var(--border);
-  }
-  .lookup-item:last-child { border-bottom: none; }
-  .lookup-item:hover { background: var(--surface); }
-
-  .lookup-item-name {
-    font-size: 13px;
-    color: var(--text);
-  }
-
-  .lookup-item-id {
-    font-size: 10px;
-    color: var(--text3);
-    font-family: 'DM Mono', monospace;
-    margin-top: 2px;
-  }
-
-  .lookup-item-empty {
-    padding: 12px;
-    font-size: 12px;
-    color: var(--text3);
-    text-align: center;
-  }
-
-  /* UNICODE FIELD */
-  .unicode-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--info);
-    text-decoration: none;
-    margin-top: 4px;
-  }
-  .unicode-link:hover { text-decoration: underline; }
-  .unicode-link svg { flex-shrink: 0; }
-
-  /* REJECTION SECTION */
-  #rejection-section {
-    display: none;
-  }
-
-  /* ACTIONS */
-  .actions-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 2rem 0 1rem;
-    gap: 12px;
-  }
-
-  .actions-right {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    border: none;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #000;
-  }
-  .btn-primary:hover { background: var(--accent2); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .btn-secondary {
-    background: var(--surface2);
-    color: var(--text2);
-    border: 1px solid var(--border2);
-  }
-  .btn-secondary:hover { color: var(--text); border-color: var(--text3); }
-
-  .btn-ghost {
-    background: none;
-    color: var(--text3);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover { color: var(--text2); border-color: var(--border2); }
-
-  /* NOTIFICATION */
-  .notif {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: var(--radius-lg);
-    padding: 14px 18px;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transform: translateY(120%);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 200;
-    max-width: 360px;
-  }
-  .notif.show { transform: translateY(0); }
-  .notif.success { border-left: 3px solid var(--success); }
-  .notif.error { border-left: 3px solid var(--error); }
-  .notif.info { border-left: 3px solid var(--info); }
-
-  /* GUIDE */
-  .guide-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--text3);
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: 'DM Sans', sans-serif;
-    padding: 0;
-  }
-  .guide-toggle:hover { color: var(--text2); }
-
-  .guide-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    margin-bottom: 1.5rem;
-    display: none;
-  }
-  .guide-panel.open { display: block; }
-
-  .guide-panel h3 {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: var(--text);
-  }
-
-  .guide-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .guide-step {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .guide-step-num {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text2);
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .guide-step-text {
-    font-size: 12px;
-    color: var(--text2);
-    line-height: 1.6;
-  }
-
-  .guide-step-text strong { color: var(--text); font-weight: 500; }
-  .guide-step-text code {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-  }
-
-  .csv-preview {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--text2);
-    overflow-x: auto;
-    white-space: nowrap;
-    margin-top: 8px;
-  }
-
-  /* LOADING */
-  .spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid var(--border2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .loading-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 300;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .loading-overlay.show { display: flex; }
-  .loading-overlay p { font-size: 13px; color: var(--text2); }
-
-  /* RESPONSIVE */
-  @media (max-width: 600px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .form-grid.triple { grid-template-columns: 1fr 1fr; }
-    .span2 { grid-column: span 1; }
-    .steps { flex-direction: column; }
-    .step { border-right: none; border-bottom: 1px solid var(--border); }
-  }
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #222222;
+  --border: #2e2e2e;
+  --border2: #3a3a3a;
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --accent: #f0b429;
+  --accent2: #e09b00;
+  --error: #e05252;
+  --success: #4caf88;
+  --info: #5b9cf6;
+  --warning: #f0a029;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }
+
+/* ── LOGIN ── */
+#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+.login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 3rem; width: 100%; max-width: 420px; text-align: center; }
+.logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+.logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; color: #000; }
+.logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+.login-card h1 { font-size: 22px; font-weight: 500; margin-bottom: 0.5rem; letter-spacing: -0.4px; }
+.login-card > p { color: var(--text2); font-size: 13px; margin-bottom: 2rem; line-height: 1.6; }
+.btn-login { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 20px; background: var(--accent); color: #000; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.btn-login:hover { background: var(--accent2); }
+.login-note { margin-top: 1.5rem; font-size: 12px; color: var(--text3); line-height: 1.6; }
+
+/* ── APP SHELL ── */
+#app-screen { display: none; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.user-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
+.user-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+.btn-logout { background: none; border: 1px solid var(--border2); color: var(--text2); padding: 5px 12px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.btn-logout:hover { border-color: var(--text2); color: var(--text); }
+
+/* ── WIZARD NAV ── */
+.wizard-nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; overflow-x: auto; }
+.wizard-step { display: flex; align-items: center; gap: 8px; padding: 16px 20px; cursor: default; border-bottom: 2px solid transparent; color: var(--text3); font-size: 13px; font-weight: 500; white-space: nowrap; transition: all 0.15s; }
+.wizard-step.active { color: var(--text); border-bottom-color: var(--accent); }
+.wizard-step.done { color: var(--text2); cursor: pointer; }
+.wizard-step.done:hover { color: var(--text); }
+.wizard-num { width: 20px; height: 20px; border-radius: 50%; background: var(--border2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text3); flex-shrink: 0; }
+.wizard-step.active .wizard-num { background: var(--accent); color: #000; }
+.wizard-step.done .wizard-num { background: var(--success); color: #000; }
+
+/* ── MAIN ── */
+.main { max-width: 980px; margin: 0 auto; padding: 2.5rem 2rem; }
+.screen { display: none; }
+.screen.active { display: block; }
+.page-header { margin-bottom: 2rem; }
+.page-header h2 { font-size: 22px; font-weight: 500; letter-spacing: -0.5px; margin-bottom: 0.4rem; }
+.page-header p { color: var(--text2); font-size: 13px; line-height: 1.6; }
+
+/* ── CARDS ── */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 1rem; overflow: hidden; }
+.card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.card-icon { width: 28px; height: 28px; border-radius: 6px; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.card-title { font-size: 13px; font-weight: 600; }
+.card-sub { font-size: 11px; color: var(--text3); margin-left: auto; }
+.card-body { padding: 20px; }
+
+/* ── FORMS ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+.form-grid.single { grid-template-columns: 1fr; }
+.span2 { grid-column: span 2; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+label { font-size: 11px; font-weight: 500; color: var(--text2); letter-spacing: 0.04em; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+.req { color: var(--accent); font-size: 13px; line-height: 1; }
+input[type="text"], input[type="number"], input[type="date"], select, textarea { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 9px 12px; transition: border-color 0.15s; width: 100%; outline: none; -webkit-appearance: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; appearance: none; }
+.field.has-error input, .field.has-error select { border-color: var(--error); }
+.error-msg { font-size: 11px; color: var(--error); display: none; }
+.field.has-error .error-msg { display: block; }
+
+/* ── LOOKUP ── */
+.lookup-wrap { position: relative; }
+.lookup-input { padding-right: 80px !important; }
+.lookup-status { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-family: 'DM Mono', monospace; pointer-events: none; }
+.lookup-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); z-index: 50; max-height: 200px; overflow-y: auto; display: none; }
+.lookup-results.open { display: block; }
+.lookup-item { padding: 9px 12px; cursor: pointer; transition: background 0.1s; border-bottom: 1px solid var(--border); }
+.lookup-item:last-child { border-bottom: none; }
+.lookup-item:hover { background: var(--surface); }
+.lookup-item-name { font-size: 13px; color: var(--text); }
+.lookup-item-sub { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 2px; }
+.lookup-item-empty { padding: 12px; font-size: 12px; color: var(--text3); text-align: center; }
+
+/* ── MISC FIELD UI ── */
+.unicode-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--info); text-decoration: none; margin-top: 2px; }
+.unicode-link:hover { text-decoration: underline; }
+.field-row { display: flex; gap: 8px; align-items: flex-end; }
+.field-row .field { flex: 1; }
+.btn-icon { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); width: 36px; height: 36px; border-radius: var(--radius); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+.btn-icon:hover { border-color: var(--text3); color: var(--text); }
+.btn-icon.spinning svg { animation: spin 0.6s linear infinite; }
+
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
+.btn-secondary:hover { color: var(--text); border-color: var(--text3); }
+.btn-ghost { background: none; color: var(--text3); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--text2); border-color: var(--border2); }
+.actions-bar { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0 0.5rem; gap: 12px; }
+.actions-right { display: flex; gap: 10px; align-items: center; }
+
+/* ── PASTE AREA ── */
+.paste-area { background: var(--surface2); border: 2px dashed var(--border2); border-radius: var(--radius-lg); padding: 2.5rem 2rem; text-align: center; transition: border-color 0.15s; cursor: text; position: relative; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.paste-area:focus-within { border-color: var(--accent); }
+.paste-area.has-data { border-color: var(--success); border-style: solid; }
+.paste-hint { color: var(--text3); font-size: 13px; line-height: 1.8; pointer-events: none; }
+.paste-hint strong { color: var(--text2); }
+#paste-input { position: absolute; inset: 0; opacity: 0; resize: none; width: 100%; height: 100%; cursor: text; padding: 1rem; background: transparent; border: none; color: transparent; font-size: 1px; outline: none; }
+.paste-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 0.5rem; }
+.stat-badge { background: var(--surface); border: 1px solid var(--border2); border-radius: 20px; padding: 3px 12px; font-size: 12px; color: var(--text2); }
+
+/* ── MAPPING TABLE ── */
+.mapping-wrap { overflow-x: auto; }
+.mapping-table { border-collapse: collapse; width: 100%; }
+.mapping-table th, .mapping-table td { padding: 8px 10px; text-align: left; border: 1px solid var(--border); }
+.mapping-table thead th { background: var(--surface2); color: var(--text2); font-size: 11px; font-weight: 500; }
+.mapping-table tbody td { background: var(--surface); font-size: 12px; }
+.col-original { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
+.col-preview { color: var(--text3); font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mapping-select { width: 100%; min-width: 190px; font-size: 12px; padding: 6px 28px 6px 8px; }
+.cfs-wrap { margin-top: 6px; position: relative; }
+.cfs-input { width: 100%; font-size: 12px; padding: 5px 8px; }
+.cfs-results { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); z-index: 60; max-height: 160px; overflow-y: auto; display: none; }
+.cfs-results.open { display: block; }
+.cfs-item { padding: 7px 10px; cursor: pointer; font-size: 12px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+.cfs-item:hover { background: var(--surface); }
+.cfs-item:last-child { border-bottom: none; }
+.cfs-label { color: var(--text); }
+.cfs-api { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); }
+.ref-warning { font-size: 10px; color: var(--warning); margin-top: 4px; }
+
+/* ── PREVIEW TABLE ── */
+.preview-wrap { overflow: auto; max-height: 62vh; }
+.preview-table { border-collapse: collapse; min-width: 100%; font-size: 12px; }
+.preview-table thead { position: sticky; top: 0; z-index: 10; }
+.preview-table th { background: var(--surface2); color: var(--text2); font-weight: 500; padding: 9px 10px; border: 1px solid var(--border); white-space: nowrap; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.preview-table th.req-col::after { content: ' *'; color: var(--accent); }
+.preview-table td { padding: 3px 5px; border: 1px solid var(--border); background: var(--surface); vertical-align: middle; }
+.preview-table tr:hover td { background: #1e1e1e; }
+.preview-table tr.row-error td { background: rgba(224,82,82,0.05); }
+.preview-table tr.row-error td:nth-child(2) { border-left: 3px solid var(--error); }
+.row-num { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 8px !important; text-align: right; min-width: 36px; }
+.cell-input { background: transparent; border: 1px solid transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; width: 100%; min-width: 80px; padding: 4px 5px; outline: none; border-radius: 4px; transition: all 0.1s; }
+.cell-input:focus { background: var(--surface2); border-color: var(--accent); }
+.cell-input.cell-error { border-color: var(--error) !important; }
+.cell-select { background: transparent; border: 1px solid transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; width: 100%; min-width: 120px; padding: 4px 22px 4px 5px; outline: none; cursor: pointer; -webkit-appearance: none; border-radius: 4px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; }
+.cell-select:focus { background-color: var(--surface2); border-color: var(--accent); }
+.cell-select.cell-error { border-color: var(--error) !important; }
+
+/* ── CONFIRM MODAL ── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 2rem; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg); width: 100%; max-width: 520px; }
+.modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.modal-header h3 { font-size: 16px; font-weight: 500; }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.summary-grid { display: grid; grid-template-columns: auto 1fr; gap: 8px 20px; font-size: 13px; }
+.summary-label { color: var(--text2); white-space: nowrap; }
+.summary-value { color: var(--text); font-weight: 500; }
+.warning-box { background: rgba(240,160,41,0.08); border: 1px solid rgba(240,160,41,0.25); border-radius: var(--radius); padding: 10px 14px; margin-top: 14px; font-size: 12px; color: var(--warning); line-height: 1.6; }
+.error-box { background: rgba(224,82,82,0.08); border: 1px solid rgba(224,82,82,0.25); border-radius: var(--radius); padding: 10px 14px; margin-top: 14px; font-size: 12px; color: var(--error); line-height: 1.6; }
+
+/* ── RESULTS ── */
+.results-stats { display: flex; gap: 12px; margin-bottom: 1.5rem; }
+.result-stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 24px; flex: 1; text-align: center; }
+.result-stat-num { font-size: 32px; font-weight: 600; letter-spacing: -1px; }
+.result-stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.result-stat.s-total .result-stat-num { color: var(--text); }
+.result-stat.s-ok .result-stat-num { color: var(--success); }
+.result-stat.s-err .result-stat-num { color: var(--error); }
+.result-row { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: flex-start; }
+.result-row:last-child { border-bottom: none; }
+.result-row.r-fail { background: rgba(224,82,82,0.04); }
+.result-badge { padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; white-space: nowrap; flex-shrink: 0; margin-top: 1px; }
+.result-badge.r-ok { background: rgba(76,175,136,0.15); color: var(--success); }
+.result-badge.r-fail { background: rgba(224,82,82,0.15); color: var(--error); }
+
+/* ── TAGS / MISC ── */
+.tag { display: inline-flex; align-items: center; gap: 5px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--text2); }
+.tag.green { background: rgba(76,175,136,0.1); border-color: rgba(76,175,136,0.3); color: var(--success); }
+.notif { position: fixed; bottom: 2rem; right: 2rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 14px 18px; font-size: 13px; display: flex; align-items: center; gap: 10px; transform: translateY(120%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 200; max-width: 360px; }
+.notif.show { transform: translateY(0); }
+.notif.success { border-left: 3px solid var(--success); }
+.notif.error { border-left: 3px solid var(--error); }
+.notif.info { border-left: 3px solid var(--info); }
+.notif.warning { border-left: 3px solid var(--warning); }
+.loading-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.loading-overlay.show { display: flex; }
+.loading-overlay p { font-size: 13px; color: var(--text2); }
+.spinner { width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 600px) {
+  .form-grid, .form-grid.triple { grid-template-columns: 1fr; }
+  .span2 { grid-column: span 1; }
+  .results-stats { flex-direction: column; }
+}
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ═══ LOGIN ═══════════════════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-card">
     <div class="logo">
@@ -663,17 +234,19 @@
       <span class="logo-text">Qwello</span>
     </div>
     <h1>Site Import Tool</h1>
-    <p>Neue Standorte direkt in SiteTracker anlegen — mit geführtem Formular und automatischer Validierung.</p>
+    <p>Import multiple sites directly into SiteTracker — paste from Excel, map columns, done.</p>
     <button class="btn-login" onclick="startLogin()">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-      Mit Salesforce anmelden
+      Sign in with Salesforce
     </button>
-    <p class="login-note">Login über euren Qwello Salesforce Account. Nur Qwello-Mitarbeiter mit gültigem Account haben Zugriff.</p>
+    <p class="login-note">Only Qwello employees with an active Salesforce account have access.</p>
   </div>
 </div>
 
-<!-- APP SCREEN -->
+<!-- ═══ APP ══════════════════════════════════════════════════════════ -->
 <div id="app-screen">
+
+  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
       <div class="logo">
@@ -686,817 +259,967 @@
         <div class="user-dot"></div>
         <span id="user-name">–</span>
       </div>
-      <button class="btn-logout" onclick="logout()">Abmelden</button>
+      <button class="btn-logout" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <!-- Wizard Nav -->
+  <div class="wizard-nav">
+    <div class="wizard-step active" id="wnav-1" onclick="tryGoToStep(1)">
+      <div class="wizard-num">1</div>Global Settings
+    </div>
+    <div class="wizard-step" id="wnav-2" onclick="tryGoToStep(2)">
+      <div class="wizard-num">2</div>Paste Data
+    </div>
+    <div class="wizard-step" id="wnav-3" onclick="tryGoToStep(3)">
+      <div class="wizard-num">3</div>Map Columns
+    </div>
+    <div class="wizard-step" id="wnav-4" onclick="tryGoToStep(4)">
+      <div class="wizard-num">4</div>Review &amp; Import
+    </div>
+    <div class="wizard-step" id="wnav-5">
+      <div class="wizard-num">5</div>Results
     </div>
   </div>
 
   <div class="main">
-    <div class="page-header">
-      <h2>Neuen Standort anlegen</h2>
-      <p>Fülle das Formular aus und exportiere die CSV-Datei für den Import über Salesforce Inspector.</p>
-    </div>
 
-    <!-- STEPS -->
-    <div class="steps">
-      <div class="step active" id="step-1">
-        <div class="step-num">1</div>
-        <div class="step-label">Formular ausfüllen</div>
+    <!-- ── SCREEN 1: GLOBAL SETTINGS ── -->
+    <div class="screen active" id="screen-1">
+      <div class="page-header">
+        <h2>Global Settings</h2>
+        <p>These values apply to every site in this import batch.</p>
       </div>
-      <div class="step" id="step-2">
-        <div class="step-num">2</div>
-        <div class="step-label">CSV exportieren</div>
-      </div>
-      <div class="step" id="step-3">
-        <div class="step-num">3</div>
-        <div class="step-label">In Salesforce importieren</div>
-      </div>
-    </div>
 
-    <!-- GUIDE TOGGLE -->
-    <button class="guide-toggle" onclick="toggleGuide()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      Anleitung für Salesforce Inspector anzeigen
-    </button>
-
-    <div class="guide-panel" id="guide-panel">
-      <h3>So importierst du die CSV in Salesforce Inspector</h3>
-      <div class="guide-steps">
-        <div class="guide-step">
-          <div class="guide-step-num">1</div>
-          <div class="guide-step-text">Formular ausfüllen und auf <strong>CSV exportieren</strong> klicken — die Datei wird automatisch heruntergeladen.</div>
-        </div>
-        <div class="guide-step">
-          <div class="guide-step-num">2</div>
-          <div class="guide-step-text">Salesforce Inspector Reloaded öffnen (Chrome Extension, blaues Icon oben rechts) → <strong>Import / Export Data</strong>.</div>
-        </div>
-        <div class="guide-step">
-          <div class="guide-step-num">3</div>
-          <div class="guide-step-text">Oben <strong>Object: <code>sitetracker__Site__c</code></strong> auswählen, Action: <strong>Insert</strong>.</div>
-        </div>
-        <div class="guide-step">
-          <div class="guide-step-num">4</div>
-          <div class="guide-step-text">CSV-Datei in das Feld ziehen oder hochladen. Die Spaltenköpfe werden automatisch erkannt.</div>
-        </div>
-        <div class="guide-step">
-          <div class="guide-step-num">5</div>
-          <div class="guide-step-text">Auf <strong>Import</strong> klicken. Bei Erfolg erscheint eine grüne Bestätigung mit der neuen Record-ID.</div>
-        </div>
-        <div class="guide-step">
-          <div class="guide-step-num">6</div>
-          <div class="guide-step-text">Fehler? Screenshot machen und an <strong>wgu@qwello.de</strong> schicken.</div>
-        </div>
-      </div>
-      <div class="csv-preview" id="csv-preview-example">Wird nach dem Ausfüllen hier angezeigt…</div>
-    </div>
-
-    <!-- SECTION 1: GRUNDDATEN -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-icon">📍</div>
-        <span class="section-title">Grunddaten</span>
-        <span class="section-subtitle">Pflichtfelder</span>
-      </div>
-      <div class="form-grid">
-        <!-- Program Lookup -->
-        <div class="field" id="field-program">
-          <label>Program <span class="req">*</span></label>
-          <div class="lookup-wrap">
-            <input type="text" id="program-search" class="lookup-input" placeholder="Programmname eingeben…" oninput="searchLookup('program', this.value)" autocomplete="off">
-            <span class="lookup-status" id="program-status"></span>
-            <div class="lookup-results" id="program-results"></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">📋</div><span class="card-title">Batch Info</span></div>
+        <div class="card-body">
+          <div class="form-grid single">
+            <div class="field">
+              <label>Batch Name</label>
+              <input type="text" id="g-batch-name" placeholder="e.g. Munich April 2026">
+            </div>
           </div>
-          <input type="hidden" id="program-id">
-          <span class="error-msg">Pflichtfeld – bitte Programm auswählen</span>
-        </div>
-
-        <!-- Site Name -->
-        <div class="field" id="field-name">
-          <label>Site Name <span class="req">*</span></label>
-          <input type="text" id="f-name" placeholder="z.B. DE-MUC-001">
-          <span class="error-msg">Pflichtfeld</span>
-        </div>
-
-        <!-- Site Status (legacy) -->
-        <div class="field" id="field-sitetracker-status">
-          <label>Site Status (SiteTracker) <span class="req">*</span></label>
-          <select id="f-sitetracker-status">
-            <option value="">– auswählen –</option>
-            <option>Imported and Reserve</option>
-            <option>Live</option>
-            <option>In Contract Negotiation</option>
-            <option>Built Up - Not Live</option>
-            <option>Under Contract</option>
-            <option>Rejected</option>
-            <option>Location Concept</option>
-            <option>All Permits on Hand</option>
-            <option>Backlog</option>
-            <option>Decommissioned</option>
-            <option>PowerRacing</option>
-            <option>Submitted</option>
-            <option>Open</option>
-          </select>
-          <span class="error-msg">Pflichtfeld</span>
-        </div>
-
-        <!-- Site Status 2026 -->
-        <div class="field" id="field-status2026">
-          <label>Site Status 2026 <span class="req">*</span></label>
-          <select id="f-status2026" onchange="handleStatus2026Change(this.value)">
-            <option value="">– auswählen –</option>
-            <option>Live</option>
-            <option>Rejected</option>
-            <option>Development</option>
-            <option>Live & Under Development</option>
-            <option>Evaluation</option>
-            <option>Decommissioned</option>
-          </select>
-          <span class="error-msg">Pflichtfeld</span>
         </div>
       </div>
-    </div>
 
-    <!-- SECTION 2: STANDORT -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-icon">🗺️</div>
-        <span class="section-title">Standort & Adresse</span>
-      </div>
-      <div class="form-grid">
-        <!-- Country -->
-        <div class="field" id="field-country">
-          <label>Land <span class="req">*</span></label>
-          <select id="f-country" onchange="handleCountryChange(this.value)">
-            <option value="">– auswählen –</option>
-            <option>Denmark</option>
-            <option>Spain</option>
-            <option>Sweden</option>
-            <option>UK</option>
-            <option>France</option>
-            <option>Germany</option>
-            <option>Poland</option>
-          </select>
-          <span class="error-msg">Pflichtfeld</span>
-        </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">🌍</div><span class="card-title">Location</span><span class="card-sub">Applies to all rows</span></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field" id="gfield-country">
+              <label>Country <span class="req">*</span></label>
+              <div class="field-row">
+                <div class="field" style="flex:1;gap:0;">
+                  <select id="g-country" onchange="onCountryChange(this.value)">
+                    <option value="">– select –</option>
+                  </select>
+                </div>
+                <button class="btn-icon" id="country-refresh-btn" onclick="refreshCountries()" title="Reload countries from Salesforce">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+                </button>
+              </div>
+              <span class="error-msg">Required</span>
+            </div>
 
-        <!-- City -->
-        <div class="field" id="field-city">
-          <label>Stadt <span class="req">*</span></label>
-          <input type="text" id="f-city" placeholder="z.B. München">
-          <span class="error-msg">Pflichtfeld</span>
-        </div>
-
-        <!-- Unicode -->
-        <div class="field" id="field-unicode">
-          <label>Unicode ID <span class="req">*</span></label>
-          <input type="text" id="f-unicode" placeholder="z.B. DEMUC" maxlength="10">
-          <a class="unicode-link" id="unicode-link" href="#" target="_blank" style="display:none;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-            UNECE-Liste für dieses Land öffnen
-          </a>
-          <span class="field-hint">Aus der offiziellen UNECE-Liste für das gewählte Land auswählen</span>
-          <span class="error-msg">Pflichtfeld</span>
-        </div>
-
-        <!-- Street -->
-        <div class="field">
-          <label>Straße</label>
-          <input type="text" id="f-street" placeholder="Straße und Hausnummer">
-        </div>
-
-        <!-- ZIP -->
-        <div class="field">
-          <label>PLZ</label>
-          <input type="text" id="f-zip" placeholder="z.B. 80333">
-        </div>
-
-        <!-- State -->
-        <div class="field">
-          <label>Bundesland / Region</label>
-          <input type="text" id="f-state" placeholder="z.B. Bayern">
-        </div>
-
-        <!-- Admin District -->
-        <div class="field">
-          <label>Administrative District</label>
-          <input type="text" id="f-admin" placeholder="">
-        </div>
-
-        <!-- Region -->
-        <div class="field">
-          <label>Region</label>
-          <input type="text" id="f-region" placeholder="">
-        </div>
-
-        <!-- Lat -->
-        <div class="field" id="field-lat">
-          <label>Breitengrad (Lat) <span class="req">*</span></label>
-          <input type="number" id="f-lat" placeholder="z.B. 48.137154" step="any">
-          <span class="error-msg">Pflichtfeld – Dezimalzahl</span>
-        </div>
-
-        <!-- Long -->
-        <div class="field" id="field-long">
-          <label>Längengrad (Long) <span class="req">*</span></label>
-          <input type="number" id="f-long" placeholder="z.B. 11.576124" step="any">
-          <span class="error-msg">Pflichtfeld – Dezimalzahl</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECTION 3: VERANTWORTLICHE -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-icon">👤</div>
-        <span class="section-title">Verantwortliche</span>
-      </div>
-      <div class="form-grid">
-        <!-- Sales Manager -->
-        <div class="field" id="field-sales">
-          <label>Sales Manager <span class="req">*</span></label>
-          <div class="lookup-wrap">
-            <input type="text" id="sales-search" class="lookup-input" placeholder="Name eingeben…" oninput="searchLookup('user-sales', this.value)" autocomplete="off">
-            <span class="lookup-status" id="user-sales-status"></span>
-            <div class="lookup-results" id="user-sales-results"></div>
+            <div class="field" id="gfield-unicode">
+              <label>Unicode ID <span class="req">*</span></label>
+              <input type="text" id="g-unicode" placeholder="e.g. DEMUC" maxlength="10">
+              <a class="unicode-link" id="unicode-link" href="#" target="_blank" style="display:none;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                Open UNECE list for this country
+              </a>
+              <span class="error-msg">Required</span>
+            </div>
           </div>
-          <input type="hidden" id="sales-id">
-          <span class="error-msg">Pflichtfeld – Person aus Liste auswählen</span>
         </div>
+      </div>
 
-        <!-- Project Manager -->
-        <div class="field" id="field-pm">
-          <label>Project Manager <span class="req">*</span></label>
-          <div class="lookup-wrap">
-            <input type="text" id="pm-search" class="lookup-input" placeholder="Name eingeben…" oninput="searchLookup('user-pm', this.value)" autocomplete="off">
-            <span class="lookup-status" id="user-pm-status"></span>
-            <div class="lookup-results" id="user-pm-results"></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon">👥</div><span class="card-title">Program &amp; Responsible Persons</span><span class="card-sub">Applies to all rows</span></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field" id="gfield-program">
+              <label>Program <span class="req">*</span></label>
+              <div class="lookup-wrap">
+                <input type="text" id="g-program-search" class="lookup-input" placeholder="Type program name…" oninput="searchLookup('g-program', this.value)" autocomplete="off">
+                <span class="lookup-status" id="g-program-status"></span>
+                <div class="lookup-results" id="g-program-results"></div>
+              </div>
+              <input type="hidden" id="g-program-id">
+              <span class="error-msg">Required — select from list</span>
+            </div>
+
+            <div></div>
+
+            <div class="field" id="gfield-sales">
+              <label>Sales Manager <span class="req">*</span></label>
+              <div class="lookup-wrap">
+                <input type="text" id="g-sales-search" class="lookup-input" placeholder="Type name…" oninput="searchLookup('g-user-sales', this.value)" autocomplete="off">
+                <span class="lookup-status" id="g-user-sales-status"></span>
+                <div class="lookup-results" id="g-user-sales-results"></div>
+              </div>
+              <input type="hidden" id="g-sales-id">
+              <span class="error-msg">Required — select from list</span>
+            </div>
+
+            <div class="field" id="gfield-pm">
+              <label>Project Manager <span class="req">*</span></label>
+              <div class="lookup-wrap">
+                <input type="text" id="g-pm-search" class="lookup-input" placeholder="Type name…" oninput="searchLookup('g-user-pm', this.value)" autocomplete="off">
+                <span class="lookup-status" id="g-user-pm-status"></span>
+                <div class="lookup-results" id="g-user-pm-results"></div>
+              </div>
+              <input type="hidden" id="g-pm-id">
+              <span class="error-msg">Required — select from list</span>
+            </div>
           </div>
-          <input type="hidden" id="pm-id">
-          <span class="error-msg">Pflichtfeld – Person aus Liste auswählen</span>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <div></div>
+        <div class="actions-right">
+          <button class="btn btn-primary" onclick="validateGlobalsAndNext()">
+            Continue
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- SECTION 4: TECHNISCHE DATEN -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-icon">⚡</div>
-        <span class="section-title">Technische Daten</span>
-        <span class="section-subtitle">Optional</span>
+    <!-- ── SCREEN 2: PASTE DATA ── -->
+    <div class="screen" id="screen-2">
+      <div class="page-header">
+        <h2>Paste Data</h2>
+        <p>Copy your Excel table and paste it here. The first row is used as column headers.</p>
       </div>
-      <div class="form-grid triple">
-        <div class="field">
-          <label>Pole Model</label>
-          <select id="f-pole-model">
-            <option value="">–</option>
-            <option>CP05</option>
-            <option>CP07</option>
-            <option>CP21</option>
-            <option>CP06</option>
-            <option>Ecotap Duo Wide</option>
-            <option>Autel DC50</option>
-            <option>Autel DH240</option>
-            <option>tba</option>
-            <option>CP22</option>
-          </select>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="paste-area" id="paste-area" onclick="document.getElementById('paste-input').focus()">
+            <div class="paste-hint" id="paste-hint">
+              <strong>Paste Excel table here</strong><br>
+              Select your table in Excel → click here → Ctrl+V / ⌘+V
+            </div>
+            <div class="paste-stats" id="paste-stats" style="display:none;"></div>
+            <textarea id="paste-input" onpaste="setTimeout(()=>handlePaste(this.value),10)" oninput="handlePaste(this.value)" autocomplete="off" spellcheck="false"></textarea>
+          </div>
         </div>
-        <div class="field">
-          <label>Anzahl Poles</label>
-          <input type="number" id="f-poles" placeholder="z.B. 2" min="0">
-        </div>
-        <div class="field">
-          <label>Location Concept Score</label>
-          <input type="number" id="f-concept-score" placeholder="z.B. 75" min="0" max="100">
-        </div>
-        <div class="field">
-          <label>Location Design</label>
-          <select id="f-location-design">
-            <option value="">–</option>
-            <option>Perpendicular</option>
-            <option>Longitudinal</option>
-            <option>Diagonal</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Location Setup</label>
-          <select id="f-location-setup">
-            <option value="">–</option>
-            <option>Covered Car Park</option>
-            <option>Other</option>
-            <option>Island</option>
-            <option>Pavement</option>
-            <option>Car Park</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Allowed Parking Time</label>
-          <input type="text" id="f-parking-time" placeholder="z.B. 90 min">
-        </div>
-        <div class="field">
-          <label>Sidewalk Width (m)</label>
-          <input type="number" id="f-sidewalk" placeholder="z.B. 3.5" step="0.1" min="0">
-        </div>
-        <div class="field">
-          <label>Parking Space Length (m)</label>
-          <input type="number" id="f-parking-len" placeholder="z.B. 5.0" step="0.1" min="0">
-        </div>
-        <div class="field">
-          <label>Parking Space Width (m)</label>
-          <input type="number" id="f-parking-wid" placeholder="z.B. 2.5" step="0.1" min="0">
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn btn-ghost" onclick="tryGoToStep(1)">← Back</button>
+        <div class="actions-right">
+          <button class="btn btn-ghost" onclick="clearPaste()">Clear</button>
+          <button class="btn btn-primary" id="btn-to-mapping" onclick="tryGoToStep(3)" disabled>
+            Map Columns
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- SECTION 5: VERTRAG -->
-    <div class="form-section">
-      <div class="section-header">
-        <div class="section-icon">📄</div>
-        <span class="section-title">Vertrag</span>
-        <span class="section-subtitle">Optional</span>
+    <!-- ── SCREEN 3: COLUMN MAPPING ── -->
+    <div class="screen" id="screen-3">
+      <div class="page-header">
+        <h2>Map Columns</h2>
+        <p>Assign each column to the matching SiteTracker field. Set unused columns to "Skip".</p>
       </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Contract End Date</label>
-          <input type="date" id="f-contract-end">
+
+      <div class="card">
+        <div class="card-body" style="padding:0;">
+          <div class="mapping-wrap">
+            <table class="mapping-table" id="mapping-table"></table>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn btn-ghost" onclick="tryGoToStep(2)">← Back</button>
+        <div class="actions-right">
+          <button class="btn btn-primary" onclick="applyMappingAndNext()">
+            Preview &amp; Review
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- SECTION 6: REJECTION (nur wenn Status = Rejected) -->
-    <div class="form-section" id="rejection-section">
-      <div class="section-header">
-        <div class="section-icon">❌</div>
-        <span class="section-title">Rejection</span>
-        <span class="section-subtitle">Erforderlich wenn Status = Rejected</span>
+    <!-- ── SCREEN 4: REVIEW & IMPORT ── -->
+    <div class="screen" id="screen-4">
+      <div class="page-header">
+        <h2>Review &amp; Import</h2>
+        <p>Check all data before importing. Cells can be edited directly.</p>
       </div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Rejection Actor</label>
-          <select id="f-rejection-actor">
-            <option value="">–</option>
-            <option>City</option>
-            <option>Qwello</option>
-            <option>Grid Provider</option>
-            <option>City District</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Rejection Reason</label>
-          <select id="f-rejection-reason">
-            <option value="">–</option>
-            <option>Parking restrictions</option>
-            <option>Bicycle Road</option>
-            <option>Tree Protection</option>
-            <option>Narrow Parkingspace</option>
-            <option>Monument Protection</option>
-            <option>Narrow Pavement</option>
-            <option>Grid Capacity</option>
-            <option>Other</option>
-            <option>Other Operator</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Rejection Date</label>
-          <input type="date" id="f-rejection-date">
-        </div>
-        <div class="field span2">
-          <label>Rejection Reason Description</label>
-          <textarea id="f-rejection-desc" placeholder="Detaillierte Beschreibung…"></textarea>
+
+      <div class="card" id="globals-summary"></div>
+      <div id="validation-banner" style="margin-bottom:1rem;"></div>
+
+      <div class="card" style="overflow:hidden;">
+        <div class="preview-wrap" id="preview-wrap"></div>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn btn-ghost" onclick="tryGoToStep(3)">← Back</button>
+        <div class="actions-right">
+          <button class="btn btn-secondary" onclick="downloadCSV()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Download CSV
+          </button>
+          <button class="btn btn-primary" onclick="openConfirmModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Import to SiteTracker
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- ACTIONS -->
-    <div class="actions-bar">
-      <button class="btn btn-ghost" onclick="resetForm()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
-        Zurücksetzen
+    <!-- ── SCREEN 5: RESULTS ── -->
+    <div class="screen" id="screen-5">
+      <div class="page-header">
+        <h2>Import Complete</h2>
+        <p id="results-subtitle"></p>
+      </div>
+      <div class="results-stats" id="results-stats"></div>
+      <div class="card">
+        <div id="results-list" style="max-height:60vh;overflow-y:auto;"></div>
+      </div>
+      <div class="actions-bar">
+        <div></div>
+        <div class="actions-right">
+          <button class="btn btn-secondary" id="btn-retry-csv" onclick="downloadRetryCsv()" style="display:none;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Download Errors as CSV
+          </button>
+          <button class="btn btn-primary" onclick="startNewBatch()">New Import</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ CONFIRM MODAL ══════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <h3>Confirm Import</h3>
+    </div>
+    <div class="modal-body">
+      <div class="summary-grid" id="confirm-summary"></div>
+      <div id="confirm-warnings"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="runImport()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Import now
       </button>
-      <div class="actions-right">
-        <button class="btn btn-secondary" onclick="previewCSV()">
-          Vorschau
-        </button>
-        <button class="btn btn-primary" onclick="exportCSV()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          CSV exportieren
-        </button>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- NOTIFICATION -->
 <div class="notif" id="notif"></div>
-
-<!-- LOADING -->
 <div class="loading-overlay" id="loading">
   <div class="spinner" style="width:28px;height:28px;border-width:3px;"></div>
-  <p id="loading-text">Lade Daten…</p>
+  <p id="loading-text">Loading…</p>
 </div>
 
 <script>
-// ============================================================
+// ════════════════════════════════════════════════════════════
 // CONFIG
-// ============================================================
-const SF_DOMAIN = 'https://sitetracker-qwello.my.salesforce.com';
-const CLIENT_ID = '3MVG92fFMZeJeHJdodQ_Lga8Dk2Nnl9BeHVD2dMF7By6.4pSxBcLtlpFtSla3sFs7XS4rAwltO3VZW8tCsGn3';
+// ════════════════════════════════════════════════════════════
+const SF_DOMAIN   = 'https://sitetracker-qwello.my.salesforce.com';
+const CLIENT_ID   = '3MVG92fFMZeJeHJdodQ_Lga8Dk2Nnl9BeHVD2dMF7By6.4pSxBcLtlpFtSla3sFs7XS4rAwltO3VZW8tCsGn3';
 const REDIRECT_URI = 'https://wolfster.github.io/qwello-site-import/callback.html';
-const PAGES_BASE = 'https://wolfster.github.io/qwello-site-import';
+const SF_API      = 'v59.0';
+const SITE_OBJECT = 'sitetracker__Site__c';
 
 const UNECE_URLS = {
-  'Germany': 'https://service.unece.org/trade/locode/de.htm',
-  'Poland': 'https://service.unece.org/trade/locode/pl.htm',
-  'Denmark': 'https://service.unece.org/trade/locode/dk.htm',
-  'Sweden': 'https://service.unece.org/trade/locode/se.htm',
-  'Spain': 'https://service.unece.org/trade/locode/es.htm',
-  'France': 'https://service.unece.org/trade/locode/fr.htm',
-  'UK': 'https://service.unece.org/trade/locode/gb.htm',
+  Germany: 'https://service.unece.org/trade/locode/de.htm',
+  Poland:  'https://service.unece.org/trade/locode/pl.htm',
+  Denmark: 'https://service.unece.org/trade/locode/dk.htm',
+  Sweden:  'https://service.unece.org/trade/locode/se.htm',
+  Spain:   'https://service.unece.org/trade/locode/es.htm',
+  France:  'https://service.unece.org/trade/locode/fr.htm',
+  UK:      'https://service.unece.org/trade/locode/gb.htm',
 };
 
-// ============================================================
+const FALLBACK_COUNTRIES = ['Denmark','France','Germany','Poland','Spain','Sweden','UK'];
+
+const PICKLISTS = {
+  'sitetracker__Site_Status__c': ['Imported and Reserve','Live','In Contract Negotiation','Built Up - Not Live','Under Contract','Rejected','Location Concept','All Permits on Hand','Backlog','Decommissioned','PowerRacing','Submitted','Open'],
+  'Site_Status_2026__c':        ['Live','Rejected','Development','Live & Under Development','Evaluation','Decommissioned'],
+  'Pole_Model__c':              ['CP05','CP07','CP21','CP06','Ecotap Duo Wide','Autel DC50','Autel DH240','tba','CP22'],
+  'Location_Design__c':         ['Perpendicular','Longitudinal','Diagonal'],
+  'Location_Setup__c':          ['Covered Car Park','Other','Island','Pavement','Car Park'],
+  'Rejection_Actor__c':         ['City','Qwello','Grid Provider','City District'],
+  'Rejection_Reason__c':        ['Parking restrictions','Bicycle Road','Tree Protection','Narrow Parkingspace','Monument Protection','Narrow Pavement','Grid Capacity','Other','Other Operator'],
+};
+
+// Per-row mappable fields (global fields are handled separately)
+const FIELDS = [
+  { api:'Name',                              label:'Site Name',                  type:'text',     required:true  },
+  { api:'sitetracker__Site_Status__c',       label:'Site Status (ST)',            type:'picklist', required:true  },
+  { api:'Site_Status_2026__c',               label:'Site Status 2026',            type:'picklist', required:true  },
+  { api:'City__c',                           label:'City',                        type:'text',     required:true  },
+  { api:'sitetracker__Lat__c',               label:'Lat',                         type:'number',   required:true  },
+  { api:'sitetracker__Long__c',              label:'Long',                        type:'number',   required:true  },
+  { api:'sitetracker__Street_Address__c',    label:'Street Address',              type:'text'                     },
+  { api:'sitetracker__Zip_Code__c',          label:'Zip Code',                    type:'text'                     },
+  { api:'State__c',                          label:'State',                       type:'text'                     },
+  { api:'Administrative_District__c',        label:'Administrative District',     type:'text'                     },
+  { api:'Region__c',                         label:'Region',                      type:'text'                     },
+  { api:'Location_Concept_Score__c',         label:'Location Concept Score',      type:'number'                   },
+  { api:'Pole_Model__c',                     label:'Pole Model',                  type:'picklist'                 },
+  { api:'Number_of_poles__c',                label:'Number of Poles',             type:'number'                   },
+  { api:'Location_Design__c',               label:'Location Design',             type:'picklist'                 },
+  { api:'Location_Setup__c',                label:'Location Setup',              type:'picklist'                 },
+  { api:'Sidewalk_width__c',                 label:'Sidewalk Width (m)',          type:'number'                   },
+  { api:'Parking_space_length__c',           label:'Parking Space Length (m)',    type:'number'                   },
+  { api:'Parking_space_width__c',            label:'Parking Space Width (m)',     type:'number'                   },
+  { api:'Allowed_Parking_Time__c',           label:'Allowed Parking Time',        type:'text'                     },
+  { api:'Contract_End_Date__c',              label:'Contract End Date',           type:'date'                     },
+  { api:'Rejection_Actor__c',                label:'Rejection Actor',             type:'picklist'                 },
+  { api:'Rejection_Reason__c',               label:'Rejection Reason',            type:'picklist'                 },
+  { api:'Rejection_Date__c',                 label:'Rejection Date',              type:'date'                     },
+  { api:'Rejection_Reason_Description__c',   label:'Rejection Description',       type:'text'                     },
+];
+
+const GLOBAL_APIS = new Set(['Country__c','Unicode_ID__c','Program__c','Sales_Manager__c','Project_Manager__c']);
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+const S = {
+  countries:     [],
+  allFields:     [],   // from SF describe, for custom field search
+  rawHeaders:    [],
+  rawRows:       [],
+  mapping:       [],   // [{colIndex, api, label, type, skip, custom, isRef}]
+  rows:          [],   // [{rowIndex, cells:{api:val}, errors:[{api,msg}]}]
+  importResults: [],
+};
+
+// ════════════════════════════════════════════════════════════
 // AUTH
-// ============================================================
+// ════════════════════════════════════════════════════════════
 function generateCodeVerifier() {
   const arr = new Uint8Array(32);
   crypto.getRandomValues(arr);
-  return btoa(String.fromCharCode(...arr)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return btoa(String.fromCharCode(...arr)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
-
-async function generateCodeChallenge(verifier) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(verifier);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+async function generateCodeChallenge(v) {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v));
+  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
-
 async function startLogin() {
   const verifier = generateCodeVerifier();
-  const challenge = await generateCodeChallenge(verifier);
   sessionStorage.setItem('pkce_verifier', verifier);
+  const challenge = await generateCodeChallenge(verifier);
+  const p = new URLSearchParams({ response_type:'code', client_id:CLIENT_ID, redirect_uri:REDIRECT_URI, scope:'api id', code_challenge:challenge, code_challenge_method:'S256' });
+  window.location.href = `${SF_DOMAIN}/services/oauth2/authorize?${p}`;
+}
+function getToken() { return sessionStorage.getItem('sf_token'); }
+function getBase()  { return sessionStorage.getItem('sf_instance') || SF_DOMAIN; }
+function logout()   { sessionStorage.clear(); location.reload(); }
 
-  const params = new URLSearchParams({
-    response_type: 'code',
-    client_id: CLIENT_ID,
-    redirect_uri: REDIRECT_URI,
-    scope: 'api id',
-    code_challenge: challenge,
-    code_challenge_method: 'S256',
-  });
-
-  window.location.href = `${SF_DOMAIN}/services/oauth2/authorize?${params}`;
+async function initApp(token, instanceUrl, name) {
+  sessionStorage.setItem('sf_token', token);
+  sessionStorage.setItem('sf_instance', instanceUrl);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display   = 'block';
+  document.getElementById('user-name').textContent = name || 'Signed in';
+  const cached = sessionStorage.getItem('sf_all_fields');
+  if (cached) S.allFields = JSON.parse(cached);
+  await loadCountries();
+  showNotif('Signed in ✓', 'success');
 }
 
-async function exchangeCode(code) {
-  const verifier = sessionStorage.getItem('pkce_verifier');
-  const body = new URLSearchParams({
-    grant_type: 'authorization_code',
-    client_id: CLIENT_ID,
-    redirect_uri: REDIRECT_URI,
-    code,
-    code_verifier: verifier,
-  });
+async function checkCallback() {
+  const params = new URLSearchParams(location.search);
+  const token  = params.get('token');
+  if (token) {
+    const instanceUrl = decodeURIComponent(params.get('instance_url') || SF_DOMAIN);
+    const name        = decodeURIComponent(params.get('user_name')    || '');
+    await initApp(token, instanceUrl, name);
+    history.replaceState({}, '', location.pathname);
+    return;
+  }
+  const existing = getToken();
+  if (existing) await initApp(existing, getBase(), sessionStorage.getItem('sf_user') || '');
+}
 
-  const res = await fetch(`${SF_DOMAIN}/services/oauth2/token`, {
+// ════════════════════════════════════════════════════════════
+// SF API
+// ════════════════════════════════════════════════════════════
+async function sfGet(path) {
+  const res = await fetch(`${getBase()}/services/data/${SF_API}${path}`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  });
+  if (!res.ok) throw new Error(`SF ${res.status}`);
+  return res.json();
+}
+async function sfQuery(soql) {
+  const d = await sfGet(`/query?q=${encodeURIComponent(soql)}`);
+  return d.records || [];
+}
+async function sfInsertBatch(records) {
+  const res = await fetch(`${getBase()}/services/data/${SF_API}/composite/sobjects`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
+    headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ allOrNone: false, records })
   });
-
+  if (!res.ok) throw new Error(`Import API ${res.status}`);
   return res.json();
 }
 
-function getToken() { return sessionStorage.getItem('sf_token'); }
-function getInstanceUrl() { return sessionStorage.getItem('sf_instance') || SF_DOMAIN; }
-
-function logout() {
-  sessionStorage.clear();
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-screen').style.display = 'none';
-}
-
-async function initApp(token, instanceUrl, userInfo) {
-  sessionStorage.setItem('sf_token', token);
-  sessionStorage.setItem('sf_instance', instanceUrl);
-
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-name').textContent = userInfo?.name || userInfo?.email || 'Angemeldet';
-
-  showNotif('Erfolgreich angemeldet ✓', 'success');
-}
-
-// Check for OAuth callback
-async function checkCallback() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('code');
-  const token = params.get('token'); // passed from callback.html
-  const instanceUrl = params.get('instance_url');
-  const userName = params.get('user_name');
-
-  if (token) {
-    // Came back from callback page
-    const info = { name: decodeURIComponent(userName || '') };
-    await initApp(token, decodeURIComponent(instanceUrl || SF_DOMAIN), info);
-    window.history.replaceState({}, '', window.location.pathname);
-    return;
+// ════════════════════════════════════════════════════════════
+// COUNTRIES  (cached per session, refresh button)
+// ════════════════════════════════════════════════════════════
+async function loadCountries(force = false) {
+  const cached = sessionStorage.getItem('sf_countries');
+  if (cached && !force) { S.countries = JSON.parse(cached); populateCountrySelect(); return; }
+  const btn = document.getElementById('country-refresh-btn');
+  btn.classList.add('spinning');
+  try {
+    const desc = await sfGet(`/sobjects/${SITE_OBJECT}/describe`);
+    const f = desc.fields.find(x => x.name === 'Country__c');
+    S.countries = f ? f.picklistValues.filter(v => v.active).map(v => v.value) : FALLBACK_COUNTRIES;
+    sessionStorage.setItem('sf_countries', JSON.stringify(S.countries));
+    // Cache all updateable fields for custom mapping
+    S.allFields = desc.fields
+      .filter(x => x.updateable && x.name !== 'Id' && !GLOBAL_APIS.has(x.name))
+      .map(x => ({ api: x.name, label: x.label, type: x.type }));
+    sessionStorage.setItem('sf_all_fields', JSON.stringify(S.allFields));
+    if (force) showNotif('Countries updated ✓', 'success');
+  } catch(e) {
+    S.countries = FALLBACK_COUNTRIES;
+    if (force) showNotif('Could not reload — using fallback list', 'warning');
   }
+  btn.classList.remove('spinning');
+  populateCountrySelect();
+}
+async function refreshCountries() { await loadCountries(true); }
 
-  // Check existing session
-  const existingToken = getToken();
-  if (existingToken) {
-    const name = sessionStorage.getItem('sf_user') || '';
-    await initApp(existingToken, getInstanceUrl(), { name });
-  }
+function populateCountrySelect() {
+  const sel = document.getElementById('g-country');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">– select –</option>';
+  S.countries.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    if (c === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+function onCountryChange(val) {
+  const link = document.getElementById('unicode-link');
+  const url  = UNECE_URLS[val];
+  if (url) { link.href = url; link.style.display = 'inline-flex'; }
+  else       link.style.display = 'none';
 }
 
-// ============================================================
+// ════════════════════════════════════════════════════════════
 // LOOKUP SEARCH
-// ============================================================
-let lookupTimers = {};
-
+// ════════════════════════════════════════════════════════════
+const _lookupTimers = {};
 async function searchLookup(type, query) {
-  clearTimeout(lookupTimers[type]);
-  if (query.length < 2) {
-    closeLookup(type);
-    return;
-  }
-
-  lookupTimers[type] = setTimeout(async () => {
+  clearTimeout(_lookupTimers[type]);
+  if (query.length < 2) { closeLookup(type); return; }
+  _lookupTimers[type] = setTimeout(async () => {
     const status = document.getElementById(`${type}-status`);
-    status.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block;"></div>';
-
+    if (!status) return;
+    status.innerHTML = '<div class="spinner"></div>';
     try {
-      let soql, nameField, labelField;
-
-      const q = query.replace(/'/g, "''");
-      if (type === 'program') {
+      const q = query.replace(/'/g,"''");
+      let soql, nameField = 'Name';
+      if (type === 'g-program') {
         soql = `SELECT Id, Name FROM sitetracker__Program__c WHERE Name LIKE '%${q}%' ORDER BY Name LIMIT 10`;
-        nameField = 'Name';
-      } else if (type === 'user-sales' || type === 'user-pm') {
+      } else {
         soql = `SELECT Id, Name, Email FROM User WHERE (Name LIKE '%${q}%' OR Email LIKE '%${q}%') AND IsActive = true ORDER BY Name LIMIT 10`;
-        nameField = 'Name';
       }
-
-      const url = `${getInstanceUrl()}/services/data/v59.0/query?q=${encodeURIComponent(soql)}`;
-      const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }
-      });
-
-      const data = await res.json();
+      const records = await sfQuery(soql);
       status.textContent = '';
-      renderLookupResults(type, data.records || [], nameField);
-
-    } catch (e) {
-      status.textContent = '✗';
-      status.style.color = 'var(--error)';
+      renderLookupResults(type, records, nameField);
+    } catch(e) {
+      status.textContent = '✗'; status.style.color = 'var(--error)';
     }
   }, 350);
 }
-
 function renderLookupResults(type, records, nameField) {
   const el = document.getElementById(`${type}-results`);
   if (!el) return;
-
   if (!records.length) {
-    el.innerHTML = '<div class="lookup-item-empty">Keine Ergebnisse</div>';
-    el.classList.add('open');
-    return;
+    el.innerHTML = '<div class="lookup-item-empty">No results</div>';
+    el.classList.add('open'); return;
   }
-
   el.innerHTML = records.map(r => `
-    <div class="lookup-item" onclick="selectLookup('${type}', '${r.Id}', ${JSON.stringify(r[nameField])})">
+    <div class="lookup-item" onclick="selectLookup('${type}','${r.Id}',${JSON.stringify(r[nameField])})">
       <div class="lookup-item-name">${r[nameField]}${r.Email ? ` <span style="color:var(--text3);font-size:11px;">(${r.Email})</span>` : ''}</div>
-      <div class="lookup-item-id">${r.Id}</div>
-    </div>
-  `).join('');
+      <div class="lookup-item-sub">${r.Id}</div>
+    </div>`).join('');
   el.classList.add('open');
 }
-
 function selectLookup(type, id, name) {
   closeLookup(type);
-
-  if (type === 'program') {
-    document.getElementById('program-search').value = name;
-    document.getElementById('program-id').value = id;
-    clearFieldError('field-program');
-  } else if (type === 'user-sales') {
-    document.getElementById('sales-search').value = name;
-    document.getElementById('sales-id').value = id;
-    clearFieldError('field-sales');
-  } else if (type === 'user-pm') {
-    document.getElementById('pm-search').value = name;
-    document.getElementById('pm-id').value = id;
-    clearFieldError('field-pm');
+  const map = {
+    'g-program':    ['g-program-search',  'g-program-id', 'gfield-program'],
+    'g-user-sales': ['g-sales-search',    'g-sales-id',   'gfield-sales'  ],
+    'g-user-pm':    ['g-pm-search',       'g-pm-id',      'gfield-pm'     ],
+  };
+  const [searchId, hiddenId, fieldId] = map[type] || [];
+  if (searchId) {
+    document.getElementById(searchId).value = name;
+    document.getElementById(hiddenId).value = id;
+    clearFieldError(fieldId);
   }
 }
-
-function closeLookup(type) {
-  const el = document.getElementById(`${type}-results`);
-  if (el) el.classList.remove('open');
-}
-
-// Close dropdowns on outside click
-document.addEventListener('click', (e) => {
-  ['program', 'user-sales', 'user-pm'].forEach(type => {
+function closeLookup(type) { document.getElementById(`${type}-results`)?.classList.remove('open'); }
+document.addEventListener('click', e => {
+  ['g-program','g-user-sales','g-user-pm'].forEach(type => {
     const results = document.getElementById(`${type}-results`);
-    const input = document.getElementById(type === 'program' ? 'program-search' : type === 'user-sales' ? 'sales-search' : 'pm-search');
-    if (results && input && !results.contains(e.target) && e.target !== input) {
-      results.classList.remove('open');
-    }
+    const inputId = { 'g-program':'g-program-search', 'g-user-sales':'g-sales-search', 'g-user-pm':'g-pm-search' }[type];
+    const input   = document.getElementById(inputId);
+    if (results && input && !results.contains(e.target) && e.target !== input) results.classList.remove('open');
   });
 });
 
-// ============================================================
-// FORM LOGIC
-// ============================================================
-function handleCountryChange(country) {
-  const link = document.getElementById('unicode-link');
-  const url = UNECE_URLS[country];
-  if (url) {
-    link.href = url;
-    link.style.display = 'inline-flex';
-  } else {
-    link.style.display = 'none';
+// ════════════════════════════════════════════════════════════
+// VALIDATION HELPERS
+// ════════════════════════════════════════════════════════════
+function setFieldError(id, err) { document.getElementById(id)?.classList.toggle('has-error', err); }
+function clearFieldError(id)    { document.getElementById(id)?.classList.remove('has-error'); }
+
+function validateGlobalsAndNext() {
+  let ok = true;
+  [
+    ['gfield-country', () => document.getElementById('g-country').value],
+    ['gfield-unicode', () => document.getElementById('g-unicode').value.trim()],
+    ['gfield-program', () => document.getElementById('g-program-id').value],
+    ['gfield-sales',   () => document.getElementById('g-sales-id').value],
+    ['gfield-pm',      () => document.getElementById('g-pm-id').value],
+  ].forEach(([fid, fn]) => { const err = !fn(); setFieldError(fid, err); if (err) ok = false; });
+  if (!ok) { showNotif('Please fill in all required fields', 'error'); return; }
+  goToStep(2);
+}
+
+// ════════════════════════════════════════════════════════════
+// WIZARD NAVIGATION
+// ════════════════════════════════════════════════════════════
+let currentStep = 1;
+
+function tryGoToStep(n) {
+  if (n === currentStep) return;
+  if (n > 2 && !S.rawRows.length)  { showNotif('Please paste data first', 'error'); return; }
+  if (n > 3 && !S.mapping.length)  { showNotif('Please map columns first', 'error'); return; }
+  if (n > 4) return;
+  goToStep(n);
+}
+
+function goToStep(n) {
+  document.getElementById(`screen-${currentStep}`).classList.remove('active');
+  document.getElementById(`screen-${n}`).classList.add('active');
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById(`wnav-${i}`);
+    if (!el) continue;
+    el.classList.remove('active','done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
   }
+  currentStep = n;
+  if (n === 3) renderMappingTable();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function handleStatus2026Change(val) {
-  const section = document.getElementById('rejection-section');
-  section.style.display = val === 'Rejected' ? 'block' : 'none';
+// ════════════════════════════════════════════════════════════
+// STEP 2 — PASTE PARSER
+// ════════════════════════════════════════════════════════════
+function handlePaste(raw) {
+  if (!raw.trim()) { clearPasteState(); return; }
+  const lines = raw.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) { showNotif('Need at least 2 rows (header + data)', 'error'); return; }
+  const parse = line => line.split('\t').map(c => c.trim().replace(/^"|"$/g,''));
+  S.rawHeaders = parse(lines[0]);
+  S.rawRows    = lines.slice(1).map(parse);
+  document.getElementById('paste-area').classList.add('has-data');
+  document.getElementById('paste-hint').innerHTML =
+    `<span style="color:var(--success);font-size:22px;">✓</span><br><strong style="color:var(--text);">${S.rawRows.length} rows ready</strong>`;
+  const stats = document.getElementById('paste-stats');
+  stats.style.display = 'flex';
+  stats.innerHTML = `<span class="stat-badge">${S.rawRows.length} rows</span><span class="stat-badge">${S.rawHeaders.length} columns</span>` +
+    S.rawHeaders.map(h => `<span class="stat-badge" style="color:var(--text3);">${escHtml(h)}</span>`).join('');
+  document.getElementById('btn-to-mapping').disabled = false;
+  buildAutoMapping();
+}
+function clearPaste() {
+  document.getElementById('paste-input').value = '';
+  clearPasteState();
+}
+function clearPasteState() {
+  S.rawHeaders = []; S.rawRows = []; S.mapping = [];
+  document.getElementById('paste-area').classList.remove('has-data');
+  document.getElementById('paste-hint').innerHTML = '<strong>Paste Excel table here</strong><br>Select your table in Excel → click here → Ctrl+V / ⌘+V';
+  document.getElementById('paste-stats').style.display = 'none';
+  document.getElementById('btn-to-mapping').disabled = true;
 }
 
-function toggleGuide() {
-  const panel = document.getElementById('guide-panel');
-  panel.classList.toggle('open');
-}
-
-// ============================================================
-// VALIDATION
-// ============================================================
-function setFieldError(fieldId, hasError) {
-  const el = document.getElementById(fieldId);
-  if (el) el.classList.toggle('has-error', hasError);
-}
-
-function clearFieldError(fieldId) {
-  const el = document.getElementById(fieldId);
-  if (el) el.classList.remove('has-error');
-}
-
-function validate() {
-  let valid = true;
-
-  const required = [
-    { fieldId: 'field-program', getValue: () => document.getElementById('program-id').value },
-    { fieldId: 'field-name', getValue: () => document.getElementById('f-name').value.trim() },
-    { fieldId: 'field-sitetracker-status', getValue: () => document.getElementById('f-sitetracker-status').value },
-    { fieldId: 'field-status2026', getValue: () => document.getElementById('f-status2026').value },
-    { fieldId: 'field-country', getValue: () => document.getElementById('f-country').value },
-    { fieldId: 'field-city', getValue: () => document.getElementById('f-city').value.trim() },
-    { fieldId: 'field-unicode', getValue: () => document.getElementById('f-unicode').value.trim() },
-    { fieldId: 'field-lat', getValue: () => document.getElementById('f-lat').value },
-    { fieldId: 'field-long', getValue: () => document.getElementById('f-long').value },
-    { fieldId: 'field-sales', getValue: () => document.getElementById('sales-id').value },
-    { fieldId: 'field-pm', getValue: () => document.getElementById('pm-id').value },
-  ];
-
-  required.forEach(({ fieldId, getValue }) => {
-    const hasError = !getValue();
-    setFieldError(fieldId, hasError);
-    if (hasError) valid = false;
+// ════════════════════════════════════════════════════════════
+// STEP 3 — COLUMN MAPPING
+// ════════════════════════════════════════════════════════════
+function buildAutoMapping() {
+  S.mapping = S.rawHeaders.map((header, colIndex) => {
+    const match = autoMatchField(header);
+    return { colIndex, ...(match || { api:'__skip__', label:'Skip', type:'skip', skip:true }) };
   });
-
-  return valid;
 }
-
-// ============================================================
-// CSV EXPORT
-// ============================================================
-function buildRow() {
-  const v = (id) => document.getElementById(id)?.value || '';
-  const row = {
-    'Name': v('f-name'),
-    'Program__c': v('program-id'),
-    'sitetracker__Site_Status__c': v('f-sitetracker-status'),
-    'Site_Status_2026__c': v('f-status2026'),
-    'Country__c': v('f-country'),
-    'City__c': v('f-city'),
-    'Unicode_ID__c': v('f-unicode'),
-    'sitetracker__Street_Address__c': v('f-street'),
-    'sitetracker__Zip_Code__c': v('f-zip'),
-    'State__c': v('f-state'),
-    'Administrative_District__c': v('f-admin'),
-    'Region__c': v('f-region'),
-    'sitetracker__Lat__c': v('f-lat'),
-    'sitetracker__Long__c': v('f-long'),
-    'Location_Concept_Score__c': v('f-concept-score'),
-    'Sales_Manager__c': v('sales-id'),
-    'Project_Manager__c': v('pm-id'),
-    'Pole_Model__c': v('f-pole-model'),
-    'Number_of_poles__c': v('f-poles'),
-    'Location_Design__c': v('f-location-design'),
-    'Location_Setup__c': v('f-location-setup'),
-    'Sidewalk_width__c': v('f-sidewalk'),
-    'Parking_space_length__c': v('f-parking-len'),
-    'Parking_space_width__c': v('f-parking-wid'),
-    'Allowed_Parking_Time__c': v('f-parking-time'),
-    'Contract_End_Date__c': v('f-contract-end'),
-    'Rejection_Actor__c': v('f-rejection-actor'),
-    'Rejection_Reason__c': v('f-rejection-reason'),
-    'Rejection_Date__c': v('f-rejection-date'),
-    'Rejection_Reason_Description__c': v('f-rejection-desc'),
-  };
-
-  // Remove empty optional fields
-  Object.keys(row).forEach(k => {
-    if (!row[k]) delete row[k];
+function autoMatchField(header) {
+  const h = header.toLowerCase().replace(/[^a-z0-9]/g,'');
+  for (const f of FIELDS) {
+    const label = f.label.toLowerCase().replace(/[^a-z0-9]/g,'');
+    const api   = f.api.toLowerCase().replace(/[^a-z0-9]/g,'');
+    if (h === label || h === api || label.startsWith(h) || h.startsWith(label.slice(0,4))) return f;
+  }
+  return null;
+}
+function renderMappingTable() {
+  const previews = S.rawRows.slice(0,3);
+  let html = '<thead><tr><th style="width:30px;">#</th>';
+  S.rawHeaders.forEach(h => { html += `<th><div class="col-original">${escHtml(h)}</div></th>`; });
+  html += '</tr></thead><tbody>';
+  // Mapping selects row
+  html += '<tr style="background:var(--bg);"><td style="font-size:10px;color:var(--text3);padding:8px;text-align:right;">Field</td>';
+  S.rawHeaders.forEach((_, i) => {
+    const m = S.mapping[i];
+    html += `<td style="vertical-align:top;">
+      ${buildMappingSelect(i, m)}
+      <div class="cfs-wrap" id="cfs-wrap-${i}" style="display:none;">
+        <input class="cfs-input" id="cfs-input-${i}" placeholder="Search field…" oninput="searchCustomField(${i},this.value)" autocomplete="off">
+        <div class="cfs-results" id="cfs-results-${i}"></div>
+      </div>
+      <div id="ref-warn-${i}" class="ref-warning" style="display:none;">⚠ Lookup field — paste Salesforce ID directly</div>
+    </td>`;
   });
-
-  return row;
-}
-
-function rowToCSV(row) {
-  const headers = Object.keys(row);
-  const values = headers.map(h => {
-    const val = String(row[h] || '').replace(/"/g, '""');
-    return val.includes(',') || val.includes('"') || val.includes('\n') ? `"${val}"` : val;
+  html += '</tr>';
+  // Preview rows
+  previews.forEach((row, ri) => {
+    html += `<tr><td class="row-num" style="padding:6px 8px;">${ri+1}</td>`;
+    S.rawHeaders.forEach((_, ci) => { html += `<td class="col-preview">${escHtml(row[ci]||'')}</td>`; });
+    html += '</tr>';
   });
-  return headers.join(',') + '\n' + values.join(',');
+  html += '</tbody>';
+  document.getElementById('mapping-table').innerHTML = html;
 }
-
-function previewCSV() {
-  const row = buildRow();
-  const csv = rowToCSV(row);
-  const preview = document.getElementById('csv-preview-example');
-  preview.textContent = csv;
-
-  const panel = document.getElementById('guide-panel');
-  panel.classList.add('open');
-  panel.scrollIntoView({ behavior: 'smooth' });
+function buildMappingSelect(colIndex, current) {
+  let html = `<select class="mapping-select" onchange="onMappingChange(${colIndex},this.value)">`;
+  html += `<option value="__skip__"${(!current||current.skip)?' selected':''}>⊘ Skip</option>`;
+  html += `<option value="__custom__">🔍 Search field…</option>`;
+  html += `<option disabled>──────────</option>`;
+  FIELDS.forEach(f => {
+    const sel = current && current.api === f.api ? ' selected' : '';
+    html += `<option value="${f.api}"${sel}>${f.label}${f.required?' *':''}</option>`;
+  });
+  html += '</select>';
+  return html;
 }
-
-function exportCSV() {
-  if (!validate()) {
-    showNotif('Bitte alle Pflichtfelder ausfüllen', 'error');
-    // Scroll to first error
-    const firstErr = document.querySelector('.has-error');
-    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+function onMappingChange(colIndex, value) {
+  const cfsWrap = document.getElementById(`cfs-wrap-${colIndex}`);
+  const refWarn = document.getElementById(`ref-warn-${colIndex}`);
+  if (value === '__custom__') {
+    cfsWrap.style.display = 'block';
+    refWarn.style.display = 'none';
+    document.getElementById(`cfs-input-${colIndex}`).focus();
+    S.mapping[colIndex] = { colIndex, api:'__skip__', label:'Skip', type:'skip', skip:true };
     return;
   }
-
-  const row = buildRow();
-  const csv = rowToCSV(row);
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const siteName = document.getElementById('f-name').value || 'site';
-  a.href = url;
-  a.download = `site-import_${siteName}_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-
-  // Update steps
-  document.getElementById('step-1').classList.remove('active');
-  document.getElementById('step-1').classList.add('done');
-  document.getElementById('step-2').classList.remove('active');
-  document.getElementById('step-2').classList.add('done');
-  document.getElementById('step-3').classList.add('active');
-
-  showNotif('CSV exportiert — jetzt in Salesforce Inspector importieren ✓', 'success');
+  cfsWrap.style.display = 'none';
+  if (value === '__skip__') {
+    S.mapping[colIndex] = { colIndex, api:'__skip__', label:'Skip', type:'skip', skip:true };
+    refWarn.style.display = 'none';
+    return;
+  }
+  const field = FIELDS.find(f => f.api === value);
+  if (field) { S.mapping[colIndex] = { colIndex, ...field }; refWarn.style.display = 'none'; }
 }
 
-function resetForm() {
-  document.querySelectorAll('input, select, textarea').forEach(el => { el.value = ''; });
-  document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
-  document.querySelectorAll('.lookup-status').forEach(el => { el.textContent = ''; el.style.color = ''; });
-  document.getElementById('rejection-section').style.display = 'none';
-  document.getElementById('unicode-link').style.display = 'none';
-  showNotif('Formular zurückgesetzt', 'info');
+// Custom field search
+const _cfsTimers = {};
+function searchCustomField(colIndex, query) {
+  clearTimeout(_cfsTimers[colIndex]);
+  const results = document.getElementById(`cfs-results-${colIndex}`);
+  if (query.length < 1) { results.classList.remove('open'); return; }
+  _cfsTimers[colIndex] = setTimeout(() => {
+    const q = query.toLowerCase();
+    const matches = S.allFields.filter(f => f.label.toLowerCase().includes(q) || f.api.toLowerCase().includes(q)).slice(0,12);
+    results.innerHTML = matches.length
+      ? matches.map(f => `<div class="cfs-item" onclick="selectCustomField(${colIndex},'${f.api}',${JSON.stringify(f.label)},'${f.type}')">
+          <div class="cfs-label">${escHtml(f.label)}</div>
+          <div class="cfs-api">${f.api}</div>
+        </div>`).join('')
+      : '<div class="lookup-item-empty">No fields found</div>';
+    results.classList.add('open');
+  }, 200);
+}
+function selectCustomField(colIndex, api, label, sfType) {
+  document.getElementById(`cfs-results-${colIndex}`).classList.remove('open');
+  document.getElementById(`cfs-input-${colIndex}`).value = label;
+  const isRef = sfType === 'reference';
+  const type  = mapSfType(sfType);
+  S.mapping[colIndex] = { colIndex, api, label, type, custom:true, isRef };
+  document.getElementById(`ref-warn-${colIndex}`).style.display = isRef ? 'block' : 'none';
+}
+function mapSfType(sfType) {
+  return { string:'text', textarea:'text', double:'number', int:'number', currency:'number', percent:'number', date:'date', datetime:'date', picklist:'text', multipicklist:'text', reference:'text', id:'text' }[sfType] || 'text';
 }
 
-// ============================================================
-// NOTIFICATIONS
-// ============================================================
-let notifTimer;
-function showNotif(msg, type = 'info') {
+function applyMappingAndNext() {
+  const active = S.mapping.filter(m => m.api && m.api !== '__skip__');
+  if (!active.length) { showNotif('Map at least one column', 'error'); return; }
+  buildPreviewRows();
+  renderGlobalsSummary();
+  renderPreviewTable();
+  goToStep(4);
+}
+
+// ════════════════════════════════════════════════════════════
+// STEP 4 — PREVIEW TABLE
+// ════════════════════════════════════════════════════════════
+function buildPreviewRows() {
+  S.rows = S.rawRows.map((rawRow, rowIndex) => {
+    const cells = {};
+    S.mapping.forEach(m => {
+      if (!m.api || m.api === '__skip__') return;
+      cells[m.api] = rawRow[m.colIndex] !== undefined ? rawRow[m.colIndex] : '';
+    });
+    return { rowIndex, cells, errors: validateRow(cells) };
+  });
+}
+function validateRow(cells) {
+  const errors = [];
+  const mappedApis = new Set(S.mapping.filter(m => m.api && m.api !== '__skip__').map(m => m.api));
+  FIELDS.filter(f => f.required && mappedApis.has(f.api)).forEach(f => {
+    if (!cells[f.api] || !String(cells[f.api]).trim()) errors.push({ api:f.api, msg:`${f.label} is required` });
+  });
+  ['sitetracker__Lat__c','sitetracker__Long__c','Location_Concept_Score__c','Number_of_poles__c','Sidewalk_width__c','Parking_space_length__c','Parking_space_width__c'].forEach(api => {
+    if (cells[api] !== undefined && cells[api] !== '' && isNaN(Number(cells[api])))
+      errors.push({ api, msg:`${FIELDS.find(f=>f.api===api)?.label||api} must be a number` });
+  });
+  return errors;
+}
+
+function renderGlobalsSummary() {
+  const pairs = [
+    ['Country',          document.getElementById('g-country').value],
+    ['Unicode ID',       document.getElementById('g-unicode').value],
+    ['Program',          document.getElementById('g-program-search').value],
+    ['Sales Manager',    document.getElementById('g-sales-search').value],
+    ['Project Manager',  document.getElementById('g-pm-search').value],
+  ];
+  const batch = document.getElementById('g-batch-name').value;
+  document.getElementById('globals-summary').innerHTML = `
+    <div class="card-header">
+      <div class="card-icon">🌍</div>
+      <span class="card-title">Global fields — applied to all ${S.rows.length} sites</span>
+      ${batch ? `<span class="tag green" style="margin-left:auto;">${escHtml(batch)}</span>` : ''}
+    </div>
+    <div class="card-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;">
+        ${pairs.map(([l,v]) => `<span class="tag"><span style="color:var(--text3);">${l}:</span>&nbsp;${escHtml(v)}</span>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderPreviewTable() {
+  const mapped = S.mapping.filter(m => m.api && m.api !== '__skip__');
+  if (!mapped.length) return;
+  const errorRows = S.rows.filter(r => r.errors.length);
+  const banner = document.getElementById('validation-banner');
+  banner.innerHTML = errorRows.length
+    ? `<div class="warning-box">⚠ <strong>${errorRows.length} row${errorRows.length>1?'s have':' has'} validation issues.</strong> Red cells must be fixed. You can edit them directly in the table below.</div>`
+    : '';
+
+  let html = '<table class="preview-table"><thead><tr><th style="width:36px;">#</th>';
+  mapped.forEach(m => {
+    const isReq = FIELDS.find(f => f.api === m.api)?.required;
+    html += `<th class="${isReq?'req-col':''}">${escHtml(m.label)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  S.rows.forEach((row, ri) => {
+    html += `<tr class="${row.errors.length?'row-error':''}"><td class="row-num">${ri+1}</td>`;
+    mapped.forEach(m => {
+      const val = row.cells[m.api] ?? '';
+      const hasErr = row.errors.some(e => e.api === m.api);
+      const cls = hasErr ? 'cell-error' : '';
+      const fd  = FIELDS.find(f => f.api === m.api);
+      if (fd?.type === 'picklist' && PICKLISTS[m.api]) {
+        const opts = ['', ...PICKLISTS[m.api]].map(v => `<option${v===val?' selected':''}>${escHtml(v)}</option>`).join('');
+        html += `<td><select class="cell-select ${cls}" onchange="updateCell(${ri},'${m.api}',this.value)">${opts}</select></td>`;
+      } else if (fd?.type === 'date') {
+        html += `<td><input type="date" class="cell-input ${cls}" value="${escHtml(val)}" onchange="updateCell(${ri},'${m.api}',this.value)"></td>`;
+      } else {
+        const inputType = fd?.type === 'number' ? 'number' : 'text';
+        html += `<td><input type="${inputType}" class="cell-input ${cls}" value="${escHtml(val)}" oninput="updateCell(${ri},'${m.api}',this.value)"></td>`;
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('preview-wrap').innerHTML = html;
+}
+
+function updateCell(rowIndex, api, value) {
+  S.rows[rowIndex].cells[api] = value;
+  S.rows[rowIndex].errors = validateRow(S.rows[rowIndex].cells);
+  const tr = document.querySelector(`#preview-wrap tbody tr:nth-child(${rowIndex+1})`);
+  if (tr) tr.className = S.rows[rowIndex].errors.length ? 'row-error' : '';
+  // Update cell border
+  const input = tr?.querySelector(`[oninput*="'${api}'"], [onchange*="'${api}'"]`);
+  if (input) input.classList.toggle('cell-error', S.rows[rowIndex].errors.some(e => e.api === api));
+}
+
+// ════════════════════════════════════════════════════════════
+// CONFIRM MODAL
+// ════════════════════════════════════════════════════════════
+function openConfirmModal() {
+  const errorCount   = S.rows.filter(r => r.errors.length).length;
+  const country      = document.getElementById('g-country').value;
+  const unicode      = document.getElementById('g-unicode').value;
+  const programName  = document.getElementById('g-program-search').value;
+  const salesName    = document.getElementById('g-sales-search').value;
+  const pmName       = document.getElementById('g-pm-search').value;
+  const batch        = document.getElementById('g-batch-name').value;
+
+  document.getElementById('confirm-summary').innerHTML = `
+    <span class="summary-label">Batch</span>       <span class="summary-value">${escHtml(batch||'–')}</span>
+    <span class="summary-label">Sites</span>        <span class="summary-value">${S.rows.length} records → ${SITE_OBJECT}</span>
+    <span class="summary-label">Country</span>      <span class="summary-value">${escHtml(country)} · ${escHtml(unicode)}</span>
+    <span class="summary-label">Program</span>      <span class="summary-value">${escHtml(programName)}</span>
+    <span class="summary-label">Sales Manager</span><span class="summary-value">${escHtml(salesName)}</span>
+    <span class="summary-label">Project Manager</span><span class="summary-value">${escHtml(pmName)}</span>`;
+
+  document.getElementById('confirm-warnings').innerHTML = errorCount
+    ? `<div class="warning-box">⚠ <strong>${errorCount} row${errorCount>1?'s have':' has'} validation issues.</strong><br>They will still be sent — Salesforce will report success or error per row.</div>`
+    : '';
+
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirmModal() { document.getElementById('confirm-modal').classList.remove('open'); }
+
+// ════════════════════════════════════════════════════════════
+// IMPORT
+// ════════════════════════════════════════════════════════════
+async function runImport() {
+  closeConfirmModal();
+  showLoading('Importing sites…');
+  const globals = {
+    Country__c:       document.getElementById('g-country').value,
+    Unicode_ID__c:    document.getElementById('g-unicode').value,
+    Program__c:       document.getElementById('g-program-id').value,
+    Sales_Manager__c: document.getElementById('g-sales-id').value,
+    Project_Manager__c: document.getElementById('g-pm-id').value,
+  };
+  const records = S.rows.map(row => ({ attributes: { type: SITE_OBJECT }, ...globals, ...row.cells }));
+  try {
+    S.importResults = await sfInsertBatch(records);
+    hideLoading();
+    renderResults(S.importResults);
+    goToStep(5);
+  } catch(e) {
+    hideLoading();
+    showNotif(`Import failed: ${e.message}`, 'error');
+  }
+}
+
+function renderResults(results) {
+  const total   = results.length;
+  const success = results.filter(r => r.success).length;
+  const errors  = total - success;
+  document.getElementById('results-subtitle').textContent = errors === 0
+    ? `All ${total} sites imported successfully.`
+    : `${success} of ${total} sites imported. ${errors} error${errors>1?'s':''}.`;
+  document.getElementById('results-stats').innerHTML = `
+    <div class="result-stat s-total"><div class="result-stat-num">${total}</div><div class="result-stat-label">Total</div></div>
+    <div class="result-stat s-ok"><div class="result-stat-num">${success}</div><div class="result-stat-label">Imported</div></div>
+    <div class="result-stat s-err"><div class="result-stat-num">${errors}</div><div class="result-stat-label">Errors</div></div>`;
+  document.getElementById('results-list').innerHTML = results.map((r, i) => {
+    const name = S.rows[i]?.cells?.Name || `Row ${i+1}`;
+    if (r.success) return `<div class="result-row">
+      <span class="result-badge r-ok">✓ OK</span>
+      <span style="font-weight:500;">${escHtml(name)}</span>
+      <span style="color:var(--text3);font-family:'DM Mono',monospace;font-size:10px;margin-left:auto;">${r.id}</span>
+    </div>`;
+    const msg = r.errors?.map(e => e.message).join('; ') || 'Unknown error';
+    return `<div class="result-row r-fail">
+      <span class="result-badge r-fail">✗ Error</span>
+      <div><div style="font-weight:500;">${escHtml(name)}</div>
+      <div style="color:var(--error);font-size:11px;margin-top:2px;">${escHtml(msg)}</div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('btn-retry-csv').style.display = errors > 0 ? 'inline-flex' : 'none';
+}
+
+// ════════════════════════════════════════════════════════════
+// CSV DOWNLOAD
+// ════════════════════════════════════════════════════════════
+function buildCsv(rows) {
+  const globals = {
+    Country__c: document.getElementById('g-country').value,
+    Unicode_ID__c: document.getElementById('g-unicode').value,
+    Program__c: document.getElementById('g-program-id').value,
+    Sales_Manager__c: document.getElementById('g-sales-id').value,
+    Project_Manager__c: document.getElementById('g-pm-id').value,
+  };
+  const keys = [...new Set([...Object.keys(globals), ...rows.flatMap(r => Object.keys(r.cells))])];
+  const esc = v => { const s = String(v||'').replace(/"/g,'""'); return s.includes(',')||s.includes('"')||s.includes('\n') ? `"${s}"` : s; };
+  return keys.join(',') + '\n' + rows.map(row => keys.map(k => esc({...globals,...row.cells}[k]||'')).join(',')).join('\n');
+}
+function triggerDownload(content, filename) {
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([content], { type:'text/csv;charset=utf-8;' })), download: filename });
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function downloadCSV() {
+  triggerDownload(buildCsv(S.rows), `${document.getElementById('g-batch-name').value||'site-import'}_${today()}.csv`);
+  showNotif('CSV downloaded', 'success');
+}
+function downloadRetryCsv() {
+  const failed = S.rows.filter((_, i) => S.importResults[i] && !S.importResults[i].success);
+  if (!failed.length) return;
+  triggerDownload(buildCsv(failed), `retry_${today()}.csv`);
+  showNotif(`${failed.length} error rows downloaded`, 'warning');
+}
+function today() { return new Date().toISOString().slice(0,10); }
+
+function startNewBatch() {
+  Object.assign(S, { rawHeaders:[], rawRows:[], mapping:[], rows:[], importResults:[] });
+  clearPasteState();
+  goToStep(1);
+}
+
+// ════════════════════════════════════════════════════════════
+// NOTIFICATIONS & LOADING
+// ════════════════════════════════════════════════════════════
+let _nt;
+function showNotif(msg, type='info') {
   const el = document.getElementById('notif');
-  el.textContent = msg;
-  el.className = `notif ${type} show`;
-  clearTimeout(notifTimer);
-  notifTimer = setTimeout(() => el.classList.remove('show'), 3500);
+  el.textContent = msg; el.className = `notif ${type} show`;
+  clearTimeout(_nt); _nt = setTimeout(() => el.classList.remove('show'), 3500);
+}
+function showLoading(text='Loading…') { document.getElementById('loading-text').textContent = text; document.getElementById('loading').classList.add('show'); }
+function hideLoading() { document.getElementById('loading').classList.remove('show'); }
+
+// ════════════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function showLoading(text = 'Lade…') {
-  document.getElementById('loading-text').textContent = text;
-  document.getElementById('loading').classList.add('show');
-}
-
-function hideLoading() {
-  document.getElementById('loading').classList.remove('show');
-}
-
-// ============================================================
+// ════════════════════════════════════════════════════════════
 // INIT
-// ============================================================
+// ════════════════════════════════════════════════════════════
 checkCallback();
 </script>
 </body>
