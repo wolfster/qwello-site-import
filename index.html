@@ -720,11 +720,17 @@ async function startLogin() {
       body: new URLSearchParams({ grant_type: 'device', client_id: CLIENT_ID })
     });
     const data = await res.json();
+    console.log('Device flow response:', JSON.stringify(data));
     if (data.error) throw new Error(data.error_description || data.error);
-    document.getElementById('device-user-code').textContent = data.user_code;
-    document.getElementById('device-verify-link').href = data.verification_uri;
+    const deviceCode = data.device_code || data.deviceCode;
+    const userCode   = data.user_code   || data.userCode;
+    const verifyUri  = data.verification_uri || data.verification_url || data.verificationUri || '';
+    const interval   = data.interval || 5;
+    if (!deviceCode) throw new Error(`Unexpected response: ${JSON.stringify(data)}`);
+    document.getElementById('device-user-code').textContent = userCode || '(check console)';
+    document.getElementById('device-verify-link').href = verifyUri;
     document.getElementById('device-status').textContent = 'Waiting for approval…';
-    pollDeviceCode(data.device_code, data.interval || 5);
+    pollDeviceCode(deviceCode, interval);
   } catch(e) {
     document.getElementById('device-status').textContent = `Error: ${e.message}`;
     document.getElementById('device-status').style.color = 'var(--error)';
