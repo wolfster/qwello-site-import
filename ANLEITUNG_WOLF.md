@@ -3,12 +3,13 @@
 ## Token holen (jedes Mal beim Einloggen)
 
 1. Salesforce in Chrome öffnen
-2. **🔍 Salesforce Inspector Reloaded** Icon in der Chrome-Leiste klicken
-3. Im Popup auf den Tab **"Org"** klicken
-4. Auf **Copy** neben "Session Id" klicken
-5. Im Tool einfügen → **Verbinden**
+2. **F12** drücken (Chrome Entwicklertools öffnen)
+3. Tab **"Application"** klicken
+4. Links: **"Cookies"** aufklappen → `sitetracker-qwello.my.salesforce.com` klicken
+5. In der Liste Zeile **`sid`** suchen → Wert anklicken → **Strg+A → Strg+C**
+6. Im Tool einfügen → **Verbinden**
 
-> Token läuft nach ca. 2h ab (Session-abhängig). Einfach neu kopieren.
+> Token läuft ab wenn du dich in SF ausloggst oder die Session abläuft. Einfach neu kopieren.
 
 ---
 

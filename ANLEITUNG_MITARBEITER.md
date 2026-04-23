@@ -7,29 +7,30 @@ Mit diesem Tool kannst du mehrere Standorte auf einmal in SiteTracker importiere
 ## Schritt 0: Vorbereitung (einmalig)
 
 Du brauchst:
-- ✅ Chrome als Browser
-- ✅ Die Chrome Extension **"Salesforce Inspector Reloaded"** installiert  
-  → Falls nicht: IT fragen, die können das in 2 Minuten einrichten
+- ✅ Chrome als Browser (kein Firefox, kein Edge)
+- ✅ In Salesforce eingeloggt sein
 
 ---
 
 ## Schritt 1: Einloggen
 
-**1.1** Öffne Salesforce in Chrome (wie gewohnt).
+**1.1** Öffne Salesforce in Chrome und stelle sicher, dass du eingeloggt bist.
 
-**1.2** Klicke auf das **🔍 Salesforce Inspector Reloaded** Icon oben rechts in Chrome  
-*(Lupen-Symbol in der Chrome-Symbolleiste)*
+**1.2** Drücke die Taste **F12** auf der Tastatur.  
+→ Am rechten Rand öffnet sich ein Entwicklerfenster (sieht kompliziert aus, aber du brauchst nur einen einzigen Klick darin).
 
-**1.3** Im Popup auf den Tab **"Org"** klicken (oben rechts in der Tab-Leiste).
+**1.3** Klicke oben in diesem Fenster auf den Tab **"Application"**.
 
-**1.4** Auf **"Copy"** neben "Session Id" klicken.  
-→ Der Token ist jetzt kopiert (du siehst nichts, aber er ist in der Zwischenablage)
+**1.4** Im linken Bereich: auf **"Cookies"** klicken → darunter auf **"sitetracker-qwello.my.salesforce.com"** klicken.
 
-**1.4** Tool öffnen: `https://wolfster.github.io/qwello-site-import/`
+**1.5** In der Tabelle rechts die Zeile **`sid`** suchen → auf den langen Wert in der Spalte "Value" klicken → **Strg+A** → **Strg+C**.
 
-**1.5** Tool öffnen, in das Feld "Session Token" klicken → **Strg+V** (Windows) oder **Cmd+V** (Mac) → **Verbinden** klicken
+**1.6** Drücke nochmal **F12** um das Fenster zu schließen.
 
-> ⚠ Der Token läuft nach ca. 2 Stunden ab. Wenn das Tool meldet "Token ungültig" → einfach Schritt 1.2–1.5 wiederholen.
+**1.7** Tool öffnen: `https://wolfster.github.io/qwello-site-import/`  
+→ In das Feld "Session Token" klicken → **Strg+V** → **Verbinden** klicken.
+
+> ⚠ Wenn das Tool "Token ungültig" meldet: Schritt 1.2–1.7 wiederholen (neuen Token kopieren).
 
 ---
 
