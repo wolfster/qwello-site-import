@@ -358,12 +358,16 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 
             <div class="field" id="gfield-unicode">
               <label>Unicode ID <span class="req">*</span></label>
-              <div id="unicode-city-wrap" class="lookup-wrap" style="display:none; margin-bottom:6px;">
-                <input type="text" id="unicode-city-search" class="lookup-input" placeholder="Search city…" oninput="searchUnlocode(this.value)" autocomplete="off">
-                <span class="lookup-status" id="unicode-city-status"></span>
-                <div class="lookup-results" id="unicode-city-results"></div>
+              <div id="unicode-city-wrap" style="display:none; margin-bottom:4px;">
+                <div style="font-size:10px; color:var(--text3); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em;">City search</div>
+                <div class="lookup-wrap">
+                  <input type="text" id="unicode-city-search" class="lookup-input" placeholder="Search city…" oninput="searchUnlocode(this.value)" autocomplete="off">
+                  <span class="lookup-status" id="unicode-city-status"></span>
+                  <div class="lookup-results" id="unicode-city-results"></div>
+                </div>
               </div>
-              <input type="text" id="g-unicode" placeholder="e.g. DEMUC" maxlength="10" oninput="onUnicodeManualInput()">
+              <div style="font-size:10px; color:var(--text3); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em;" id="unicode-code-label">Code</div>
+              <input type="text" id="g-unicode" placeholder="e.g. MUC" maxlength="5" oninput="onUnicodeManualInput()">
               <a class="unicode-link" id="unicode-link" href="#" target="_blank" style="display:none;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
                 Open UNECE list for this country
@@ -915,10 +919,12 @@ function onCountryChange(val) {
 async function loadUnlocodeForCountry(country) {
   const cityWrap = document.getElementById('unicode-city-wrap');
   const file = UNLOCODE_FILES[country];
-  if (!file) { cityWrap.style.display = 'none'; _unlocodeActive = null; return; }
+  const codeLabel = document.getElementById('unicode-code-label');
+  if (!file) { cityWrap.style.display = 'none'; if (codeLabel) codeLabel.style.display = 'none'; _unlocodeActive = null; return; }
 
   const iso = COUNTRY_ISO[country] || country.slice(0,2).toUpperCase();
   cityWrap.style.display = 'block';
+  if (codeLabel) codeLabel.style.display = 'block';
 
   if (_unlocodeCache[iso]) {
     _unlocodeActive = { data: _unlocodeCache[iso], iso };
@@ -940,6 +946,7 @@ async function loadUnlocodeForCountry(country) {
     searchEl.disabled = false;
   } catch(e) {
     cityWrap.style.display = 'none';
+    if (document.getElementById('unicode-code-label')) document.getElementById('unicode-code-label').style.display = 'none';
     _unlocodeActive = null;
   }
 }
@@ -1169,10 +1176,20 @@ function buildAutoMapping() {
 }
 function autoMatchField(header) {
   const h = header.toLowerCase().replace(/[^a-z0-9]/g,'');
+  // 1. Exact API name match (highest priority)
   for (const f of FIELDS) {
-    const label = f.label.toLowerCase().replace(/[^a-z0-9]/g,'');
-    const api   = f.api.toLowerCase().replace(/[^a-z0-9]/g,'');
-    if (h === label || h === api || label.startsWith(h) || h.startsWith(label.slice(0,4))) return f;
+    if (h === f.api.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
+  }
+  // 2. Exact label match
+  for (const f of FIELDS) {
+    if (h === f.label.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
+  }
+  // 3. Fuzzy: label starts with header (only for short headers, avoids false positives)
+  if (h.length >= 3 && h.length <= 10) {
+    for (const f of FIELDS) {
+      const label = f.label.toLowerCase().replace(/[^a-z0-9]/g,'');
+      if (label.startsWith(h)) return f;
+    }
   }
   return null;
 }
