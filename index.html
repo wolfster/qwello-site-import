@@ -303,6 +303,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <div class="user-dot"></div>
         <span id="user-name">–</span>
       </div>
+      <button id="btn-refresh-cache" class="btn-logout" onclick="refreshCache()" style="display:none;" title="Programme und User aus Salesforce neu laden und als cache.json speichern">↻ Cache aktualisieren</button>
       <button class="btn-logout" onclick="logout()">Sign out</button>
     </div>
   </div>
@@ -391,40 +392,40 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
       <div class="card" style="overflow:visible;">
         <div class="card-header"><div class="card-icon">👥</div><span class="card-title">Program &amp; Responsible Persons</span><span class="card-sub">Applies to all rows</span></div>
         <div class="card-body">
+          <div id="cache-empty-warning" style="display:none;background:var(--bg);border:1px solid var(--warning);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--warning);line-height:1.6;">
+            ⚠ Kein Cache gefunden — Programme und User können nicht geladen werden.<br>
+            <span style="color:var(--text2);">Bitte oben rechts auf <strong style="color:var(--text);">↻ Cache aktualisieren</strong> klicken (erfordert gültige Salesforce-Verbindung).</span>
+          </div>
           <div class="form-grid">
             <div class="field" id="gfield-program">
-              <label>Program <span class="req">*</span></label>
-              <div class="lookup-wrap">
-                <input type="text" id="g-program-search" class="lookup-input" placeholder="Type program name…" oninput="searchLookup('g-program', this.value)" autocomplete="off">
-                <span class="lookup-status" id="g-program-status"></span>
-                <div class="lookup-results" id="g-program-results"></div>
+              <label>Program <span class="req">*</span> <span id="cache-age" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;"></span></label>
+              <select id="g-program-select" onchange="onProgramSelect()">
+                <option value="">— Programm wählen —</option>
+                <option value="__manual__">✏ ID manuell eingeben…</option>
+              </select>
+              <div id="g-program-manual-wrap" style="display:none;margin-top:8px;">
+                <input type="text" id="g-program-manual" placeholder="Salesforce Program ID (00k…)" autocomplete="off">
+                <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block;">ID aus der Salesforce URL kopieren</span>
               </div>
-              <input type="hidden" id="g-program-id">
-              <span class="error-msg">Required — select from list</span>
+              <span class="error-msg">Required — bitte Programm wählen</span>
             </div>
 
             <div></div>
 
             <div class="field" id="gfield-sales">
               <label>Sales Manager <span class="req">*</span></label>
-              <div class="lookup-wrap">
-                <input type="text" id="g-sales-search" class="lookup-input" placeholder="Type name…" oninput="searchLookup('g-user-sales', this.value)" autocomplete="off">
-                <span class="lookup-status" id="g-user-sales-status"></span>
-                <div class="lookup-results" id="g-user-sales-results"></div>
-              </div>
-              <input type="hidden" id="g-sales-id">
-              <span class="error-msg">Required — select from list</span>
+              <select id="g-sales-select" onchange="clearFieldError('gfield-sales')">
+                <option value="">— Person wählen —</option>
+              </select>
+              <span class="error-msg">Required</span>
             </div>
 
             <div class="field" id="gfield-pm">
               <label>Project Manager <span class="req">*</span></label>
-              <div class="lookup-wrap">
-                <input type="text" id="g-pm-search" class="lookup-input" placeholder="Type name…" oninput="searchLookup('g-user-pm', this.value)" autocomplete="off">
-                <span class="lookup-status" id="g-user-pm-status"></span>
-                <div class="lookup-results" id="g-user-pm-results"></div>
-              </div>
-              <input type="hidden" id="g-pm-id">
-              <span class="error-msg">Required — select from list</span>
+              <select id="g-pm-select" onchange="clearFieldError('gfield-pm')">
+                <option value="">— Person wählen —</option>
+              </select>
+              <span class="error-msg">Required</span>
             </div>
           </div>
         </div>
@@ -694,6 +695,7 @@ async function startDemo() {
   document.getElementById('btn-load-demo').style.display = 'inline-flex';
   S.countries = FALLBACK_COUNTRIES;
   populateCountrySelect();
+  await loadCache();
   showNotif('Demo mode — no data will be sent to Salesforce', 'warning');
 }
 
@@ -821,9 +823,10 @@ async function initApp(token, instanceUrl, name) {
   document.getElementById('app-screen').style.display   = 'block';
   document.getElementById('user-name').textContent = name || 'Signed in';
   if (isDemo()) document.getElementById('demo-tag').style.display = 'inline-flex';
+  if (!isDemo()) document.getElementById('btn-refresh-cache').style.display = 'inline-block';
   const cached = sessionStorage.getItem('sf_all_fields');
   if (cached) S.allFields = JSON.parse(cached);
-  await loadCountries();
+  await Promise.all([loadCountries(), loadCache()]);
   showNotif(isDemo() ? 'Demo mode active' : 'Signed in ✓', isDemo() ? 'warning' : 'success');
 }
 
@@ -1047,67 +1050,90 @@ function onUnicodeManualInput() {
 // ════════════════════════════════════════════════════════════
 const _lookupTimers = {};
 async function searchLookup(type, query) {
-  clearTimeout(_lookupTimers[type]);
-  if (query.length < 2) { closeLookup(type); return; }
-  _lookupTimers[type] = setTimeout(async () => {
-    const status = document.getElementById(`${type}-status`);
-    if (!status) return;
-    status.innerHTML = '<div class="spinner"></div>';
-    try {
-      const q = query.replace(/'/g,"''");
-      let soql, nameField = 'Name';
-      if (type === 'g-program') {
-        soql = `SELECT Id, Name FROM sitetracker__Program__c WHERE Name LIKE '%${q}%' ORDER BY Name LIMIT 10`;
-      } else {
-        soql = `SELECT Id, Name, Email FROM User WHERE (Name LIKE '%${q}%' OR Email LIKE '%${q}%') AND IsActive = true ORDER BY Name LIMIT 10`;
-      }
-      const records = await sfQuery(soql);
-      status.textContent = '';
-      renderLookupResults(type, records, nameField);
-    } catch(e) {
-      status.textContent = '✗'; status.style.color = 'var(--error)';
+  // legacy stub — kept for safety, no longer used for global fields
+}
+
+// ════════════════════════════════════════════════════════════
+// CACHE: Programme & User aus cache.json laden
+// ════════════════════════════════════════════════════════════
+async function loadCache() {
+  try {
+    const res = await fetch('cache.json?v=' + Date.now());
+    if (!res.ok) throw new Error('not found');
+    const cache = await res.json();
+    const hasData = cache.programs?.length || cache.users?.length;
+    if (!hasData) { showCacheWarning(); return; }
+
+    const progSel = document.getElementById('g-program-select');
+    cache.programs.forEach(p => {
+      const opt = new Option(p.name, p.id);
+      progSel.insertBefore(opt, progSel.lastElementChild);
+    });
+
+    ['g-sales-select','g-pm-select'].forEach(selId => {
+      const sel = document.getElementById(selId);
+      cache.users.forEach(u => sel.add(new Option(u.name, u.id)));
+    });
+
+    if (cache.lastUpdated) {
+      document.getElementById('cache-age').textContent = `Stand: ${cache.lastUpdated}`;
     }
-  }, 350);
-}
-function renderLookupResults(type, records, nameField) {
-  const el = document.getElementById(`${type}-results`);
-  if (!el) return;
-  if (!records.length) {
-    el.innerHTML = '<div class="lookup-item-empty">No results</div>';
-    el.classList.add('open'); return;
-  }
-  el.innerHTML = records.map(r => {
-    const safeName = r[nameField].replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return `<div class="lookup-item" onclick="selectLookup('${type}','${r.Id}','${safeName}')">
-      <div class="lookup-item-name">${r[nameField]}${r.Email ? ` <span style="color:var(--text3);font-size:11px;">(${r.Email})</span>` : ''}</div>
-      <div class="lookup-item-sub">${r.Id}</div>
-    </div>`;
-  }).join('');
-  el.classList.add('open');
-}
-function selectLookup(type, id, name) {
-  closeLookup(type);
-  const map = {
-    'g-program':    ['g-program-search',  'g-program-id', 'gfield-program'],
-    'g-user-sales': ['g-sales-search',    'g-sales-id',   'gfield-sales'  ],
-    'g-user-pm':    ['g-pm-search',       'g-pm-id',      'gfield-pm'     ],
-  };
-  const [searchId, hiddenId, fieldId] = map[type] || [];
-  if (searchId) {
-    document.getElementById(searchId).value = name;
-    document.getElementById(hiddenId).value = id;
-    clearFieldError(fieldId);
+  } catch(e) {
+    showCacheWarning();
   }
 }
-function closeLookup(type) { document.getElementById(`${type}-results`)?.classList.remove('open'); }
-document.addEventListener('click', e => {
-  ['g-program','g-user-sales','g-user-pm'].forEach(type => {
-    const results = document.getElementById(`${type}-results`);
-    const inputId = { 'g-program':'g-program-search', 'g-user-sales':'g-sales-search', 'g-user-pm':'g-pm-search' }[type];
-    const input   = document.getElementById(inputId);
-    if (results && input && !results.contains(e.target) && e.target !== input) results.classList.remove('open');
-  });
-});
+
+function showCacheWarning() {
+  document.getElementById('cache-empty-warning').style.display = 'block';
+}
+
+function onProgramSelect() {
+  const sel = document.getElementById('g-program-select');
+  document.getElementById('g-program-manual-wrap').style.display = sel.value === '__manual__' ? 'block' : 'none';
+  clearFieldError('gfield-program');
+}
+
+function getProgramId() {
+  const sel = document.getElementById('g-program-select');
+  return sel.value === '__manual__' ? document.getElementById('g-program-manual').value.trim() : sel.value;
+}
+
+function getProgramName() {
+  const sel = document.getElementById('g-program-select');
+  if (sel.value === '__manual__') return document.getElementById('g-program-manual').value.trim();
+  return sel.options[sel.selectedIndex]?.text || '';
+}
+
+function getSelectName(selId) {
+  const sel = document.getElementById(selId);
+  return sel?.options[sel.selectedIndex]?.text || '';
+}
+
+async function refreshCache() {
+  if (isDemo()) { showNotif('Im Demo Mode nicht verfügbar', 'warning'); return; }
+  showLoading('Lade Daten aus Salesforce…');
+  try {
+    const [programs, users] = await Promise.all([
+      sfQuery('SELECT Id, Name FROM sitetracker__Program__c ORDER BY Name'),
+      sfQuery("SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
+    ]);
+    const cache = {
+      lastUpdated: new Date().toISOString().split('T')[0],
+      programs: programs.map(p => ({ id: p.Id, name: p.Name })),
+      users: users.map(u => ({ id: u.Id, name: u.Name })),
+    };
+    const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'cache.json';
+    a.click();
+    hideLoading();
+    showNotif(`Cache exportiert: ${programs.length} Programme, ${users.length} User — cache.json ins Repo hochladen und pushen`, 'success');
+  } catch(e) {
+    hideLoading();
+    showNotif('Fehler beim Laden: ' + e.message, 'error');
+  }
+}
 
 // ════════════════════════════════════════════════════════════
 // VALIDATION HELPERS
@@ -1120,9 +1146,9 @@ function validateGlobalsAndNext() {
   [
     ['gfield-country', () => document.getElementById('g-country').value],
     ['gfield-unicode', () => document.getElementById('g-unicode').value.trim()],
-    ['gfield-program', () => document.getElementById('g-program-id').value],
-    ['gfield-sales',   () => document.getElementById('g-sales-id').value],
-    ['gfield-pm',      () => document.getElementById('g-pm-id').value],
+    ['gfield-program', () => getProgramId()],
+    ['gfield-sales',   () => document.getElementById('g-sales-select').value],
+    ['gfield-pm',      () => document.getElementById('g-pm-select').value],
   ].forEach(([fid, fn]) => { const err = !fn(); setFieldError(fid, err); if (err) ok = false; });
   if (!ok) { showNotif('Please fill in all required fields', 'error'); return; }
   goToStep(2);
@@ -1345,9 +1371,9 @@ function renderGlobalsSummary() {
   const pairs = [
     ['Country',          document.getElementById('g-country').value],
     ['Unicode ID',       document.getElementById('g-unicode').value],
-    ['Program',          document.getElementById('g-program-search').value],
-    ['Sales Manager',    document.getElementById('g-sales-search').value],
-    ['Project Manager',  document.getElementById('g-pm-search').value],
+    ['Program',          getProgramName()],
+    ['Sales Manager',    getSelectName('g-sales-select')],
+    ['Project Manager',  getSelectName('g-pm-select')],
   ];
   const batch = document.getElementById('g-batch-name').value;
   document.getElementById('globals-summary').innerHTML = `
@@ -1419,9 +1445,9 @@ function openConfirmModal() {
   const errorCount   = S.rows.filter(r => r.errors.length).length;
   const country      = document.getElementById('g-country').value;
   const unicode      = document.getElementById('g-unicode').value;
-  const programName  = document.getElementById('g-program-search').value;
-  const salesName    = document.getElementById('g-sales-search').value;
-  const pmName       = document.getElementById('g-pm-search').value;
+  const programName  = getProgramName();
+  const salesName    = getSelectName('g-sales-select');
+  const pmName       = getSelectName('g-pm-select');
   const batch        = document.getElementById('g-batch-name').value;
 
   document.getElementById('confirm-summary').innerHTML = `
@@ -1449,9 +1475,9 @@ async function runImport() {
   const globals = {
     Country__c:       document.getElementById('g-country').value,
     Unicode_ID__c:    document.getElementById('g-unicode').value,
-    Program__c:       document.getElementById('g-program-id').value,
-    Sales_Manager__c: document.getElementById('g-sales-id').value,
-    Project_Manager__c: document.getElementById('g-pm-id').value,
+    Program__c:         getProgramId(),
+    Sales_Manager__c:   document.getElementById('g-sales-select').value,
+    Project_Manager__c: document.getElementById('g-pm-select').value,
   };
   const records = S.rows.map(row => ({ attributes: { type: SITE_OBJECT }, ...globals, ...row.cells }));
   try {
@@ -1500,9 +1526,9 @@ function buildCsv(rows) {
   const globals = {
     Country__c: document.getElementById('g-country').value,
     Unicode_ID__c: document.getElementById('g-unicode').value,
-    Program__c: document.getElementById('g-program-id').value,
-    Sales_Manager__c: document.getElementById('g-sales-id').value,
-    Project_Manager__c: document.getElementById('g-pm-id').value,
+    Program__c:         getProgramId(),
+    Sales_Manager__c:   document.getElementById('g-sales-select').value,
+    Project_Manager__c: document.getElementById('g-pm-select').value,
   };
   const keys = [...new Set([...Object.keys(globals), ...rows.flatMap(r => Object.keys(r.cells))])];
   const esc = v => { const s = String(v||'').replace(/"/g,'""'); return s.includes(',')||s.includes('"')||s.includes('\n') ? `"${s}"` : s; };
