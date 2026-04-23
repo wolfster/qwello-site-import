@@ -950,17 +950,50 @@ function searchUnlocode(query) {
       return a[1].localeCompare(b[1], 'de');
     })
     .slice(0, 10);
+  const iso = _unlocodeActive.iso;
   if (!matches.length) {
-    results.innerHTML = '<div class="lookup-item-empty">No results</div>';
+    results.innerHTML = `
+      <div class="lookup-item-empty" style="text-align:left; padding:12px 12px 8px;">
+        No match in UNLOCODE database
+        <div style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+          <input id="custom-locode-input" type="text" maxlength="3"
+            placeholder="ABC"
+            style="width:64px; text-align:center; text-transform:uppercase; letter-spacing:0.12em; font-family:'DM Mono',monospace; font-size:14px; font-weight:500; background:var(--surface); border:1px solid var(--border2); border-radius:6px; color:var(--text); padding:6px 8px;"
+            oninput="onCustomLocodeInput(this)"
+            onkeydown="if(event.key==='Enter') confirmCustomLocode()">
+          <button id="custom-locode-btn" onclick="confirmCustomLocode()"
+            style="display:none; background:var(--success); color:#000; border:none; border-radius:6px; padding:6px 12px; font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; cursor:pointer;">
+            Use this code
+          </button>
+        </div>
+        <div style="font-size:10px; color:var(--text3); margin-top:6px;">
+          ${iso} + your 3 letters = ${iso}<span id="custom-locode-preview" style="color:var(--text2);">___</span>
+        </div>
+      </div>`;
     results.classList.add('open'); return;
   }
-  const iso = _unlocodeActive.iso;
   results.innerHTML = matches.map(([code, name]) =>
     `<div class="lookup-item" onclick="selectUnlocode('${code}','${name.replace(/'/g,"\\'")}')">
       <div class="lookup-item-name">${name}</div>
       <div class="lookup-item-sub">${iso}${code}</div>
     </div>`).join('');
   results.classList.add('open');
+}
+
+function onCustomLocodeInput(el) {
+  const val = el.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 3);
+  el.value = val;
+  const preview = document.getElementById('custom-locode-preview');
+  const btn     = document.getElementById('custom-locode-btn');
+  if (preview) preview.textContent = val.padEnd(3, '_');
+  if (btn)     btn.style.display = val.length === 3 ? 'inline-block' : 'none';
+}
+
+function confirmCustomLocode() {
+  const val = (document.getElementById('custom-locode-input')?.value || '').toUpperCase();
+  if (val.length !== 3) return;
+  const cityQuery = document.getElementById('unicode-city-search').value;
+  selectUnlocode(val, cityQuery);
 }
 
 function selectUnlocode(locode, cityName) {
