@@ -1227,11 +1227,12 @@ async function searchLookup(type, query) {
     try {
       let soql, nameField, labelField;
 
+      const q = query.replace(/'/g, "''");
       if (type === 'program') {
-        soql = `SELECT Id, Name FROM sitetracker__Program__c WHERE Name LIKE '%${query.replace(/'/g,"\\'")}%' ORDER BY Name LIMIT 10`;
+        soql = `SELECT Id, Name FROM sitetracker__Program__c WHERE Name LIKE '%${q}%' ORDER BY Name LIMIT 10`;
         nameField = 'Name';
       } else if (type === 'user-sales' || type === 'user-pm') {
-        soql = `SELECT Id, Name, Email FROM User WHERE (Name LIKE '%${query.replace(/'/g,"\\'")}%' OR Email LIKE '%${query.replace(/'/g,"\\'")}%') AND IsActive = true ORDER BY Name LIMIT 10`;
+        soql = `SELECT Id, Name, Email FROM User WHERE (Name LIKE '%${q}%' OR Email LIKE '%${q}%') AND IsActive = true ORDER BY Name LIMIT 10`;
         nameField = 'Name';
       }
 
@@ -1456,16 +1457,17 @@ function exportCSV() {
   // Update steps
   document.getElementById('step-1').classList.remove('active');
   document.getElementById('step-1').classList.add('done');
-  document.getElementById('step-2').classList.add('active');
+  document.getElementById('step-2').classList.remove('active');
+  document.getElementById('step-2').classList.add('done');
+  document.getElementById('step-3').classList.add('active');
 
   showNotif('CSV exportiert — jetzt in Salesforce Inspector importieren ✓', 'success');
 }
 
 function resetForm() {
-  document.querySelectorAll('input, select, textarea').forEach(el => {
-    if (el.type !== 'hidden') el.value = '';
-  });
+  document.querySelectorAll('input, select, textarea').forEach(el => { el.value = ''; });
   document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+  document.querySelectorAll('.lookup-status').forEach(el => { el.textContent = ''; el.style.color = ''; });
   document.getElementById('rejection-section').style.display = 'none';
   document.getElementById('unicode-link').style.display = 'none';
   showNotif('Formular zurückgesetzt', 'info');
