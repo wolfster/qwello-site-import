@@ -956,9 +956,9 @@ function searchUnlocode(query) {
   }
   const iso = _unlocodeActive.iso;
   results.innerHTML = matches.map(([code, name]) =>
-    `<div class="lookup-item" onclick="selectUnlocode('${iso+code}','${name.replace(/'/g,"\\'")}')">
+    `<div class="lookup-item" onclick="selectUnlocode('${code}','${name.replace(/'/g,"\\'")}')">
       <div class="lookup-item-name">${name}</div>
-      <div class="lookup-item-sub">${iso+code}</div>
+      <div class="lookup-item-sub">${iso}${code}</div>
     </div>`).join('');
   results.classList.add('open');
 }
