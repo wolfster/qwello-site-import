@@ -490,12 +490,16 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
           <div class="form-grid">
             <div class="field" id="gfield-program">
               <label>Program <span class="req">*</span> <span id="cache-age" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;"></span></label>
-              <select id="g-program-select" onchange="onProgramSelect()">
-                <option value="">— Programm wählen —</option>
-                <option value="__manual__">✏ ID manuell eingeben…</option>
-              </select>
+              <div class="lookup-wrap">
+                <input type="text" id="g-program-search" class="lookup-input" placeholder="Programm suchen…"
+                  oninput="filterPrograms(this.value)"
+                  onfocus="filterPrograms(this.value)"
+                  autocomplete="off">
+                <div class="lookup-results" id="g-program-results"></div>
+              </div>
+              <input type="hidden" id="g-program-id">
               <div id="g-program-manual-wrap" style="display:none;margin-top:8px;">
-                <input type="text" id="g-program-manual" placeholder="Salesforce Program ID (00k…)" autocomplete="off">
+                <input type="text" id="g-program-manual" placeholder="Salesforce Program ID (a1o…)" autocomplete="off">
                 <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block;">ID aus der Salesforce URL kopieren</span>
               </div>
               <span class="error-msg">Required — bitte Programm wählen</span>
@@ -819,13 +823,15 @@ async function demoInsertBatch(records) {
 // STATE
 // ════════════════════════════════════════════════════════════
 const S = {
-  countries:     [],
-  allFields:     [],   // from SF describe, for custom field search
-  rawHeaders:    [],
-  rawRows:       [],
-  mapping:       [],   // [{colIndex, api, label, type, skip, custom, isRef}]
-  rows:          [],   // [{rowIndex, cells:{api:val}, errors:[{api,msg}]}]
-  importResults: [],
+  countries:       [],
+  allFields:       [],
+  rawHeaders:      [],
+  rawRows:         [],
+  mapping:         [],
+  rows:            [],
+  importResults:   [],
+  cachedPrograms:  [],
+  cachedUsers:     [],
 };
 
 // ════════════════════════════════════════════════════════════
@@ -1031,6 +1037,7 @@ function onCountryChange(val) {
   document.getElementById('unicode-city-search').value = '';
   closeLookup('unicode-city');
   loadUnlocodeForCountry(val);
+  updateUsersByCountry(val);
 }
 
 async function loadUnlocodeForCountry(country) {
@@ -1144,31 +1151,89 @@ async function searchLookup(type, query) {
   // legacy stub — kept for safety, no longer used for global fields
 }
 
+function closeLookup(type) {
+  document.getElementById(`${type}-results`)?.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  const results = document.getElementById('g-program-results');
+  const input   = document.getElementById('g-program-search');
+  if (results && input && !results.contains(e.target) && e.target !== input) {
+    results.classList.remove('open');
+  }
+});
+
 // ════════════════════════════════════════════════════════════
 // CACHE: Programme & User aus cache.json laden
 // ════════════════════════════════════════════════════════════
 function fillDropdowns(programs, users, label) {
-  const norm = arr => arr.map(r => ({ id: r.Id || r.id, name: r.Name || r.name }));
-
-  const progSel = document.getElementById('g-program-select');
-  while (progSel.options.length > 2) progSel.remove(1);
-  norm(programs).forEach(p => progSel.insertBefore(new Option(p.name, p.id), progSel.lastElementChild));
-
-  ['g-sales-select','g-pm-select'].forEach(selId => {
-    const sel = document.getElementById(selId);
-    while (sel.options.length > 1) sel.remove(1);
-    norm(users).forEach(u => sel.add(new Option(u.name, u.id)));
-  });
-
+  const norm = arr => arr.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, country: r.Country || r.country || '' }));
+  S.cachedPrograms = norm(programs);
+  S.cachedUsers    = norm(users);
   document.getElementById('cache-empty-warning').style.display = 'none';
   if (label) document.getElementById('cache-age').textContent = label;
+  const country = document.getElementById('g-country').value;
+  updateUsersByCountry(country);
+}
+
+function filterPrograms(query) {
+  const lower = query.toLowerCase().trim();
+  const results = lower
+    ? S.cachedPrograms.filter(p => p.name.toLowerCase().includes(lower)).slice(0, 15)
+    : S.cachedPrograms.slice(0, 10);
+  const el = document.getElementById('g-program-results');
+  if (!S.cachedPrograms.length) { el.classList.remove('open'); return; }
+  el.innerHTML = results.map(p => {
+    const safe = p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}')">
+      <div class="lookup-item-name">${escHtml(p.name)}</div>
+    </div>`;
+  }).join('') +
+  `<div class="lookup-item" style="border-top:1px solid var(--border);" onclick="showManualProgram()">
+    <div class="lookup-item-name" style="color:var(--text3);font-size:11px;">✏ ID manuell eingeben…</div>
+  </div>`;
+  el.classList.add('open');
+}
+
+function selectProgram(id, name) {
+  document.getElementById('g-program-search').value = name;
+  document.getElementById('g-program-id').value = id;
+  document.getElementById('g-program-results').classList.remove('open');
+  document.getElementById('g-program-manual-wrap').style.display = 'none';
+  clearFieldError('gfield-program');
+}
+
+function showManualProgram() {
+  document.getElementById('g-program-results').classList.remove('open');
+  document.getElementById('g-program-search').value = '';
+  document.getElementById('g-program-id').value = '';
+  document.getElementById('g-program-manual-wrap').style.display = 'block';
+  document.getElementById('g-program-manual').focus();
+}
+
+function updateUsersByCountry(country) {
+  const all = S.cachedUsers;
+  const filtered = country
+    ? all.filter(u => u.country && (
+        u.country.toLowerCase().includes(country.toLowerCase()) ||
+        country.toLowerCase().includes(u.country.toLowerCase())
+      ))
+    : all;
+  const toShow = filtered.length ? filtered : all;
+  ['g-sales-select','g-pm-select'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    const prev = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    toShow.forEach(u => sel.add(new Option(u.name, u.id)));
+    if (prev && toShow.find(u => u.id === prev)) sel.value = prev;
+  });
 }
 
 async function loadLiveData() {
   try {
     const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery("SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
+      sfQuery("SELECT Id, Name, Country FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
     ]);
     if (programs.length || users.length) {
       fillDropdowns(programs, users, `Live ✓ ${programs.length} Programme`);
@@ -1195,21 +1260,17 @@ function showCacheWarning() {
   document.getElementById('cache-empty-warning').style.display = 'block';
 }
 
-function onProgramSelect() {
-  const sel = document.getElementById('g-program-select');
-  document.getElementById('g-program-manual-wrap').style.display = sel.value === '__manual__' ? 'block' : 'none';
-  clearFieldError('gfield-program');
-}
 
 function getProgramId() {
-  const sel = document.getElementById('g-program-select');
-  return sel.value === '__manual__' ? document.getElementById('g-program-manual').value.trim() : sel.value;
+  const manual = document.getElementById('g-program-manual-wrap');
+  if (manual.style.display !== 'none') return document.getElementById('g-program-manual').value.trim();
+  return document.getElementById('g-program-id').value;
 }
 
 function getProgramName() {
-  const sel = document.getElementById('g-program-select');
-  if (sel.value === '__manual__') return document.getElementById('g-program-manual').value.trim();
-  return sel.options[sel.selectedIndex]?.text || '';
+  const manual = document.getElementById('g-program-manual-wrap');
+  if (manual.style.display !== 'none') return document.getElementById('g-program-manual').value.trim();
+  return document.getElementById('g-program-search').value;
 }
 
 function getSelectName(selId) {
@@ -1223,7 +1284,7 @@ async function refreshCache() {
   try {
     const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery("SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
+      sfQuery("SELECT Id, Name, Country FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
     ]);
     const cache = {
       lastUpdated: new Date().toISOString().split('T')[0],
