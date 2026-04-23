@@ -917,7 +917,7 @@ async function initApp(token, instanceUrl, name) {
   if (!isDemo()) document.getElementById('btn-refresh-cache').style.display = 'inline-block';
   const cached = sessionStorage.getItem('sf_all_fields');
   if (cached) S.allFields = JSON.parse(cached);
-  await Promise.all([loadCountries(), loadCache()]);
+  await Promise.all([loadCountries(), isDemo() ? loadCache() : loadLiveData()]);
   showNotif(isDemo() ? 'Demo mode active' : 'Signed in ✓', isDemo() ? 'warning' : 'success');
 }
 
@@ -1147,6 +1147,37 @@ async function searchLookup(type, query) {
 // ════════════════════════════════════════════════════════════
 // CACHE: Programme & User aus cache.json laden
 // ════════════════════════════════════════════════════════════
+function fillDropdowns(programs, users, label) {
+  const norm = arr => arr.map(r => ({ id: r.Id || r.id, name: r.Name || r.name }));
+
+  const progSel = document.getElementById('g-program-select');
+  while (progSel.options.length > 2) progSel.remove(1);
+  norm(programs).forEach(p => progSel.insertBefore(new Option(p.name, p.id), progSel.lastElementChild));
+
+  ['g-sales-select','g-pm-select'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    while (sel.options.length > 1) sel.remove(1);
+    norm(users).forEach(u => sel.add(new Option(u.name, u.id)));
+  });
+
+  document.getElementById('cache-empty-warning').style.display = 'none';
+  if (label) document.getElementById('cache-age').textContent = label;
+}
+
+async function loadLiveData() {
+  try {
+    const [programs, users] = await Promise.all([
+      sfQuery('SELECT Id, Name FROM sitetracker__Program__c ORDER BY Name'),
+      sfQuery("SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
+    ]);
+    if (programs.length || users.length) {
+      fillDropdowns(programs, users, `Live ✓ ${programs.length} Programme`);
+      return;
+    }
+  } catch(e) { /* fall through to cache */ }
+  await loadCache();
+}
+
 async function loadCache() {
   try {
     const res = await fetch('cache.json?v=' + Date.now());
@@ -1154,21 +1185,7 @@ async function loadCache() {
     const cache = await res.json();
     const hasData = cache.programs?.length || cache.users?.length;
     if (!hasData) { showCacheWarning(); return; }
-
-    const progSel = document.getElementById('g-program-select');
-    cache.programs.forEach(p => {
-      const opt = new Option(p.name, p.id);
-      progSel.insertBefore(opt, progSel.lastElementChild);
-    });
-
-    ['g-sales-select','g-pm-select'].forEach(selId => {
-      const sel = document.getElementById(selId);
-      cache.users.forEach(u => sel.add(new Option(u.name, u.id)));
-    });
-
-    if (cache.lastUpdated) {
-      document.getElementById('cache-age').textContent = `Stand: ${cache.lastUpdated}`;
-    }
+    fillDropdowns(cache.programs, cache.users, cache.lastUpdated ? `Cache: ${cache.lastUpdated}` : '');
   } catch(e) {
     showCacheWarning();
   }
@@ -1219,7 +1236,8 @@ async function refreshCache() {
     a.download = 'cache.json';
     a.click();
     hideLoading();
-    showNotif(`Cache exportiert: ${programs.length} Programme, ${users.length} User — cache.json ins Repo hochladen und pushen`, 'success');
+    fillDropdowns(programs, users, `Live ✓ ${programs.length} Programme`);
+    showNotif(`${programs.length} Programme, ${users.length} User geladen — cache.json heruntergeladen zum Pushen ins Repo`, 'success');
   } catch(e) {
     hideLoading();
     showNotif('Fehler beim Laden: ' + e.message, 'error');
