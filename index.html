@@ -236,42 +236,52 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
       <span class="logo-text">Qwello</span>
     </div>
 
-    <!-- Step 1: Sign in -->
+    <!-- Token login -->
     <div id="login-step-1">
       <h1>Site Import Tool</h1>
-      <p>Import multiple sites directly into SiteTracker — paste from Excel, map columns, done.</p>
-      <button class="btn-login" onclick="startLogin()">
+      <p>Melde dich mit deinem Salesforce Session-Token an. Den Token findest du im <strong style="color:var(--text);">Salesforce Inspector</strong> oben rechts.</p>
+
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:1.25rem 0;text-align:left;">
+        <div style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">So geht's</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
+            <span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
+            Salesforce Inspector im Browser öffnen (Chrome Extension)
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
+            <span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
+            Oben auf <strong style="color:var(--text);">"Copy Token"</strong> klicken
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
+            <span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
+            Token hier einfügen und verbinden
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:12px;text-align:left;">
+        <label for="token-input">Session Token</label>
+        <input type="password" id="token-input" placeholder="00D…" autocomplete="off"
+          onkeydown="if(event.key==='Enter')loginWithToken()"
+          oninput="document.getElementById('token-error').style.display='none'">
+        <span id="token-error" style="font-size:11px;color:var(--error);display:none;margin-top:4px;">Token ungültig oder abgelaufen — bitte neuen Token kopieren.</span>
+      </div>
+
+      <button class="btn-login" id="token-btn" onclick="loginWithToken()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-        Sign in with Salesforce
+        Verbinden
       </button>
-      <div style="display:flex;align-items:center;gap:10px;margin:12px 0 0;">
+
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 0;">
         <div style="flex:1;height:1px;background:var(--border);"></div>
-        <span style="font-size:11px;color:var(--text3);">or</span>
+        <span style="font-size:11px;color:var(--text3);">oder</span>
         <div style="flex:1;height:1px;background:var(--border);"></div>
       </div>
       <button class="btn-login" onclick="startDemo()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);margin-top:10px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 8h.01M9 15l3-3 2 2 3-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        Try Demo Mode
+        Demo Mode
       </button>
-      <p class="login-note">Only Qwello employees with an active Salesforce account have access.<br>Demo mode uses mock data — no Salesforce connection needed.</p>
-    </div>
-
-    <!-- Step 2: Device code -->
-    <div id="login-step-2" style="display:none;">
-      <h1 style="margin-bottom:0.5rem;">Approve in Salesforce</h1>
-      <p style="margin-bottom:1.5rem;">Open the link below and enter this code to sign in:</p>
-      <div style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem;text-align:center;">
-        <div id="device-user-code" style="font-size:28px;font-weight:700;letter-spacing:6px;font-family:'DM Mono',monospace;color:var(--accent);"></div>
-      </div>
-      <a id="device-verify-link" href="#" target="_blank" class="btn-login" style="text-decoration:none;margin-bottom:1rem;display:flex;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-        Open Salesforce Approval Page
-      </a>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:0.75rem;">
-        <div class="spinner"></div>
-        <span id="device-status" style="font-size:12px;color:var(--text3);">Waiting for approval…</span>
-      </div>
-      <button onclick="cancelDeviceFlow()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;">Cancel</button>
+      <p class="login-note">Nur für Qwello-Mitarbeiter mit aktivem Salesforce-Account.<br>Demo Mode verwendet Testdaten — keine SF-Verbindung nötig.</p>
     </div>
   </div>
 </div>
@@ -737,12 +747,25 @@ async function generateCodeChallenge(v) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(v));
   return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
-async function startLogin() {
-  const verifier = generateCodeVerifier();
-  sessionStorage.setItem('pkce_verifier', verifier);
-  const challenge = await generateCodeChallenge(verifier);
-  const p = new URLSearchParams({ response_type:'code', client_id:CLIENT_ID, redirect_uri:REDIRECT_URI, scope:'api id', code_challenge:challenge, code_challenge_method:'S256' });
-  window.location.href = `${SF_DOMAIN}/services/oauth2/authorize?${p}`;
+async function loginWithToken() {
+  const token = document.getElementById('token-input').value.trim();
+  if (!token) return;
+  const btn = document.getElementById('token-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Verbinde…';
+  try {
+    const res = await fetch(`${SF_DOMAIN}/services/oauth2/userinfo`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('invalid');
+    const info = await res.json();
+    const name = info.display_name || info.name || info.preferred_username || 'Angemeldet';
+    await initApp(token, SF_DOMAIN, name);
+  } catch(e) {
+    document.getElementById('token-error').style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg> Verbinden';
+  }
 }
 
 let _pollTimer;
