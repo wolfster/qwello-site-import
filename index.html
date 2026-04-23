@@ -692,7 +692,7 @@ async function startLogin() {
   sessionStorage.setItem('pkce_verifier', verifier);
   const challenge = await generateCodeChallenge(verifier);
   const p = new URLSearchParams({ response_type:'code', client_id:CLIENT_ID, redirect_uri:REDIRECT_URI, scope:'api id', code_challenge:challenge, code_challenge_method:'S256' });
-  window.location.href = `${SF_DOMAIN}/services/oauth2/authorize?${p}`;
+  window.location.href = `${SF_DOMAIN}/services/auth/oauth2/authorize?${p}`;
 }
 function getToken() { return sessionStorage.getItem('sf_token'); }
 function getBase()  { return sessionStorage.getItem('sf_instance') || SF_DOMAIN; }
