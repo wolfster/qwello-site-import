@@ -217,6 +217,8 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .spinner { width: 14px; height: 14px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.demo-tag { display: none; align-items: center; gap: 6px; background: rgba(240,160,41,0.12); border: 1px solid rgba(240,160,41,0.3); border-radius: 6px; padding: 4px 12px; font-size: 11px; color: var(--warning); font-weight: 500; white-space: nowrap; }
+
 @media (max-width: 600px) {
   .form-grid, .form-grid.triple { grid-template-columns: 1fr; }
   .span2 { grid-column: span 1; }
@@ -239,7 +241,16 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
       Sign in with Salesforce
     </button>
-    <p class="login-note">Only Qwello employees with an active Salesforce account have access.</p>
+    <div style="display:flex;align-items:center;gap:10px;margin:12px 0 0;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <span style="font-size:11px;color:var(--text3);">or</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+    <button class="btn-login" onclick="startDemo()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);margin-top:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 8h.01M9 15l3-3 2 2 3-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      Try Demo Mode
+    </button>
+    <p class="login-note">Only Qwello employees with an active Salesforce account have access.<br>Demo mode uses mock data — no Salesforce connection needed.</p>
   </div>
 </div>
 
@@ -253,6 +264,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <div class="logo-mark">Q</div>
         <span class="logo-text">Site Import</span>
       </div>
+      <div class="demo-tag" id="demo-tag">⚡ Demo Mode</div>
     </div>
     <div style="display:flex;align-items:center;gap:12px;">
       <div class="user-badge">
@@ -591,6 +603,66 @@ const FIELDS = [
 const GLOBAL_APIS = new Set(['Country__c','Unicode_ID__c','Program__c','Sales_Manager__c','Project_Manager__c']);
 
 // ════════════════════════════════════════════════════════════
+// DEMO MODE
+// ════════════════════════════════════════════════════════════
+const DEMO_PROGRAMS = [
+  { Id: 'a0XDEMO00001', Name: 'Bundeshauptstadt 2025' },
+  { Id: 'a0XDEMO00002', Name: 'Bayern Expansion' },
+  { Id: 'a0XDEMO00003', Name: 'Rhine Valley Phase 2' },
+  { Id: 'a0XDEMO00004', Name: 'Nordic Cities Q4' },
+  { Id: 'a0XDEMO00005', Name: 'Paris Metro Q3' },
+];
+const DEMO_USERS = [
+  { Id: '005DEMO00001', Name: 'Anna Müller',    Email: 'anna.mueller@qwello.de'    },
+  { Id: '005DEMO00002', Name: 'Ben Schmidt',    Email: 'ben.schmidt@qwello.de'    },
+  { Id: '005DEMO00003', Name: 'Clara Weber',    Email: 'clara.weber@qwello.de'    },
+  { Id: '005DEMO00004', Name: 'David Hoffmann', Email: 'd.hoffmann@qwello.de'     },
+];
+
+function isDemo() { return sessionStorage.getItem('demo_mode') === '1'; }
+
+async function startDemo() {
+  sessionStorage.setItem('demo_mode', '1');
+  sessionStorage.setItem('sf_token', '__demo__');
+  sessionStorage.setItem('sf_instance', SF_DOMAIN);
+  sessionStorage.setItem('sf_user', 'Demo User');
+  S.allFields = FIELDS.map(f => ({ api: f.api, label: f.label, type: f.type }));
+  sessionStorage.setItem('sf_all_fields', JSON.stringify(S.allFields));
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display   = 'block';
+  document.getElementById('user-name').textContent      = 'Demo Mode';
+  document.getElementById('demo-tag').style.display     = 'inline-flex';
+  S.countries = FALLBACK_COUNTRIES;
+  populateCountrySelect();
+  showNotif('Demo mode — no data will be sent to Salesforce', 'warning');
+}
+
+function demoQuery(soql) {
+  const sql = soql.toLowerCase();
+  if (sql.includes('program__c')) {
+    const m = soql.match(/LIKE '%([^%]+)%'/i);
+    const q = m ? m[1].toLowerCase() : '';
+    return DEMO_PROGRAMS.filter(p => !q || p.Name.toLowerCase().includes(q));
+  }
+  if (sql.includes('from user')) {
+    const m = soql.match(/LIKE '%([^%]+)%'/i);
+    const q = m ? m[1].toLowerCase() : '';
+    return DEMO_USERS.filter(u => !q || u.Name.toLowerCase().includes(q) || u.Email.toLowerCase().includes(q));
+  }
+  return [];
+}
+
+async function demoInsertBatch(records) {
+  await new Promise(r => setTimeout(r, 1100));
+  return records.map(() => {
+    const ok = Math.random() > 0.15;
+    return ok
+      ? { success: true,  id: `a0X${Math.random().toString(36).slice(2,15).toUpperCase()}`, errors: [] }
+      : { success: false, errors: [{ message: 'DEMO_ERROR: Field validation failed — this is a simulated error.' }] };
+  });
+}
+
+// ════════════════════════════════════════════════════════════
 // STATE
 // ════════════════════════════════════════════════════════════
 const S = {
@@ -632,10 +704,11 @@ async function initApp(token, instanceUrl, name) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display   = 'block';
   document.getElementById('user-name').textContent = name || 'Signed in';
+  if (isDemo()) document.getElementById('demo-tag').style.display = 'inline-flex';
   const cached = sessionStorage.getItem('sf_all_fields');
   if (cached) S.allFields = JSON.parse(cached);
   await loadCountries();
-  showNotif('Signed in ✓', 'success');
+  showNotif(isDemo() ? 'Demo mode active' : 'Signed in ✓', isDemo() ? 'warning' : 'success');
 }
 
 async function checkCallback() {
@@ -663,10 +736,12 @@ async function sfGet(path) {
   return res.json();
 }
 async function sfQuery(soql) {
+  if (isDemo()) return demoQuery(soql);
   const d = await sfGet(`/query?q=${encodeURIComponent(soql)}`);
   return d.records || [];
 }
 async function sfInsertBatch(records) {
+  if (isDemo()) return demoInsertBatch(records);
   const res = await fetch(`${getBase()}/services/data/${SF_API}/composite/sobjects`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
@@ -680,6 +755,11 @@ async function sfInsertBatch(records) {
 // COUNTRIES  (cached per session, refresh button)
 // ════════════════════════════════════════════════════════════
 async function loadCountries(force = false) {
+  if (isDemo()) {
+    S.countries = FALLBACK_COUNTRIES;
+    if (force) showNotif('Demo: country list reloaded', 'info');
+    populateCountrySelect(); return;
+  }
   const cached = sessionStorage.getItem('sf_countries');
   if (cached && !force) { S.countries = JSON.parse(cached); populateCountrySelect(); return; }
   const btn = document.getElementById('country-refresh-btn');
