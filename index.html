@@ -337,7 +337,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" style="overflow:visible;">
         <div class="card-header"><div class="card-icon">🌍</div><span class="card-title">Location</span><span class="card-sub">Applies to all rows</span></div>
         <div class="card-body">
           <div class="form-grid">
@@ -358,7 +358,12 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 
             <div class="field" id="gfield-unicode">
               <label>Unicode ID <span class="req">*</span></label>
-              <input type="text" id="g-unicode" placeholder="e.g. DEMUC" maxlength="10">
+              <div id="unicode-city-wrap" class="lookup-wrap" style="display:none; margin-bottom:6px;">
+                <input type="text" id="unicode-city-search" class="lookup-input" placeholder="Search city…" oninput="searchUnlocode(this.value)" autocomplete="off">
+                <span class="lookup-status" id="unicode-city-status"></span>
+                <div class="lookup-results" id="unicode-city-results"></div>
+              </div>
+              <input type="text" id="g-unicode" placeholder="e.g. DEMUC" maxlength="10" oninput="onUnicodeManualInput()">
               <a class="unicode-link" id="unicode-link" href="#" target="_blank" style="display:none;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
                 Open UNECE list for this country
@@ -879,11 +884,93 @@ function populateCountrySelect() {
     sel.appendChild(o);
   });
 }
+const COUNTRY_ISO = {
+  'Germany': 'DE', 'France': 'FR', 'Poland': 'PL',
+  'Denmark': 'DK', 'Sweden': 'SE', 'Spain':  'ES', 'UK': 'GB',
+};
+const UNLOCODE_FILES = {
+  'Germany': 'unlocode-de.js',
+};
+const _unlocodeCache = {};
+let _unlocodeActive = null; // { data, iso }
+
 function onCountryChange(val) {
   const link = document.getElementById('unicode-link');
   const url  = UNECE_URLS[val];
   if (url) { link.href = url; link.style.display = 'inline-flex'; }
   else       link.style.display = 'none';
+
+  document.getElementById('g-unicode').value = '';
+  document.getElementById('unicode-city-search').value = '';
+  closeLookup('unicode-city');
+  loadUnlocodeForCountry(val);
+}
+
+async function loadUnlocodeForCountry(country) {
+  const cityWrap = document.getElementById('unicode-city-wrap');
+  const file = UNLOCODE_FILES[country];
+  if (!file) { cityWrap.style.display = 'none'; _unlocodeActive = null; return; }
+
+  const iso = COUNTRY_ISO[country] || country.slice(0,2).toUpperCase();
+  cityWrap.style.display = 'block';
+
+  if (_unlocodeCache[iso]) {
+    _unlocodeActive = { data: _unlocodeCache[iso], iso };
+    document.getElementById('unicode-city-search').placeholder = 'Search city…';
+    return;
+  }
+
+  const searchEl = document.getElementById('unicode-city-search');
+  searchEl.placeholder = 'Loading…';
+  searchEl.disabled = true;
+  try {
+    const r = await fetch(file);
+    const text = await r.text();
+    const json = text.replace(/^const \w+ = /, '').replace(/;\s*$/, '');
+    const data = JSON.parse(json);
+    _unlocodeCache[iso] = data;
+    _unlocodeActive = { data, iso };
+    searchEl.placeholder = 'Search city…';
+    searchEl.disabled = false;
+  } catch(e) {
+    cityWrap.style.display = 'none';
+    _unlocodeActive = null;
+  }
+}
+
+function searchUnlocode(query) {
+  const results = document.getElementById('unicode-city-results');
+  if (!_unlocodeActive || query.length < 2) { results.classList.remove('open'); return; }
+  const q = query.toLowerCase();
+  const matches = Object.entries(_unlocodeActive.data)
+    .filter(([, name]) => name.toLowerCase().includes(q))
+    .sort((a, b) => {
+      const as = a[1].toLowerCase().startsWith(q), bs = b[1].toLowerCase().startsWith(q);
+      if (as && !bs) return -1; if (!as && bs) return 1;
+      return a[1].localeCompare(b[1], 'de');
+    })
+    .slice(0, 10);
+  if (!matches.length) {
+    results.innerHTML = '<div class="lookup-item-empty">No results</div>';
+    results.classList.add('open'); return;
+  }
+  const iso = _unlocodeActive.iso;
+  results.innerHTML = matches.map(([code, name]) =>
+    `<div class="lookup-item" onclick="selectUnlocode('${iso+code}','${name.replace(/'/g,"\\'")}')">
+      <div class="lookup-item-name">${name}</div>
+      <div class="lookup-item-sub">${iso+code}</div>
+    </div>`).join('');
+  results.classList.add('open');
+}
+
+function selectUnlocode(locode, cityName) {
+  document.getElementById('unicode-city-results').classList.remove('open');
+  document.getElementById('unicode-city-search').value = cityName;
+  document.getElementById('g-unicode').value = locode;
+}
+
+function onUnicodeManualInput() {
+  if (_unlocodeActive) document.getElementById('unicode-city-search').value = '';
 }
 
 // ════════════════════════════════════════════════════════════
