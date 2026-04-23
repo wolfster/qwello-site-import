@@ -710,31 +710,11 @@ async function generateCodeChallenge(v) {
   return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
 async function startLogin() {
-  document.getElementById('login-step-1').style.display = 'none';
-  document.getElementById('login-step-2').style.display = 'block';
-  document.getElementById('device-status').textContent = 'Requesting code…';
-  try {
-    const res = await fetch(`${SF_DOMAIN}/services/oauth2/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({ grant_type: 'device', client_id: CLIENT_ID })
-    });
-    const data = await res.json();
-    console.log('Device flow response:', JSON.stringify(data));
-    if (data.error) throw new Error(data.error_description || data.error);
-    const deviceCode = data.device_code || data.deviceCode;
-    const userCode   = data.user_code   || data.userCode;
-    const verifyUri  = data.verification_uri || data.verification_url || data.verificationUri || '';
-    const interval   = data.interval || 5;
-    if (!deviceCode) throw new Error(`Unexpected response: ${JSON.stringify(data)}`);
-    document.getElementById('device-user-code').textContent = userCode || '(check console)';
-    document.getElementById('device-verify-link').href = verifyUri;
-    document.getElementById('device-status').textContent = 'Waiting for approval…';
-    pollDeviceCode(deviceCode, interval);
-  } catch(e) {
-    document.getElementById('device-status').textContent = `Error: ${e.message}`;
-    document.getElementById('device-status').style.color = 'var(--error)';
-  }
+  const verifier = generateCodeVerifier();
+  sessionStorage.setItem('pkce_verifier', verifier);
+  const challenge = await generateCodeChallenge(verifier);
+  const p = new URLSearchParams({ response_type:'code', client_id:CLIENT_ID, redirect_uri:REDIRECT_URI, scope:'api id', code_challenge:challenge, code_challenge_method:'S256' });
+  window.location.href = `${SF_DOMAIN}/services/oauth2/authorize?${p}`;
 }
 
 let _pollTimer;
