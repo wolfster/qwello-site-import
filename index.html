@@ -1046,11 +1046,13 @@ function renderLookupResults(type, records, nameField) {
     el.innerHTML = '<div class="lookup-item-empty">No results</div>';
     el.classList.add('open'); return;
   }
-  el.innerHTML = records.map(r => `
-    <div class="lookup-item" onclick="selectLookup('${type}','${r.Id}',${JSON.stringify(r[nameField])})">
+  el.innerHTML = records.map(r => {
+    const safeName = r[nameField].replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `<div class="lookup-item" onclick="selectLookup('${type}','${r.Id}','${safeName}')">
       <div class="lookup-item-name">${r[nameField]}${r.Email ? ` <span style="color:var(--text3);font-size:11px;">(${r.Email})</span>` : ''}</div>
       <div class="lookup-item-sub">${r.Id}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   el.classList.add('open');
 }
 function selectLookup(type, id, name) {
