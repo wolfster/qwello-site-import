@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwello Site Import</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --border2: #3a3a3a;
+    --text: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --accent: #f0b429;
+    --accent2: #e09b00;
+    --error: #e05252;
+    --success: #4caf88;
+    --info: #5b9cf6;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* LOGIN SCREEN */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 3rem;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    color: #000;
+  }
+
+  .logo-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+
+  .login-card h1 {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.4px;
+  }
+
+  .login-card p {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .btn-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 20px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-login:hover { background: var(--accent2); }
+
+  .login-note {
+    margin-top: 1.5rem;
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.6;
+  }
+
+  /* APP SCREEN */
+  #app-screen { display: none; }
+
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .user-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+  }
+
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-logout:hover { border-color: var(--text2); color: var(--text); }
+
+  .main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-header h2 {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+  }
+
+  .page-header p {
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .step {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-right: 1px solid var(--border);
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  .step:last-child { border-right: none; }
+  .step.active { opacity: 1; }
+  .step.done { opacity: 0.7; }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+  .step.active .step-num {
+    background: var(--accent);
+    color: #000;
+  }
+  .step.done .step-num {
+    background: var(--success);
+    color: #000;
+  }
+
+  .step-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+  }
+  .step.active .step-label { color: var(--text); }
+
+  /* FORM */
+  .form-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .section-subtitle {
+    font-size: 11px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+
+  .form-grid {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-grid.single { grid-template-columns: 1fr; }
+  .form-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+  .span2 { grid-column: span 2; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .req {
+    color: var(--accent);
+    font-size: 13px;
+    line-height: 1;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 9px 12px;
+    transition: border-color 0.15s;
+    width: 100%;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+  }
+
+  input.error, select.error { border-color: var(--error); }
+
+  select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    appearance: none;
+  }
+
+  textarea { resize: vertical; min-height: 72px; }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  .error-msg {
+    font-size: 11px;
+    color: var(--error);
+    display: none;
+  }
+
+  .field.has-error .error-msg { display: block; }
+  .field.has-error input, .field.has-error select { border-color: var(--error); }
+
+  /* LOOKUP FIELDS */
+  .lookup-wrap {
+    position: relative;
+  }
+
+  .lookup-input {
+    padding-right: 80px !important;
+  }
+
+  .lookup-status {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    pointer-events: none;
+  }
+
+  .lookup-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    z-index: 50;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .lookup-results.open { display: block; }
+
+  .lookup-item {
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+  .lookup-item:last-child { border-bottom: none; }
+  .lookup-item:hover { background: var(--surface); }
+
+  .lookup-item-name {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .lookup-item-id {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .lookup-item-empty {
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+  }
+
+  /* UNICODE FIELD */
+  .unicode-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--info);
+    text-decoration: none;
+    margin-top: 4px;
+  }
+  .unicode-link:hover { text-decoration: underline; }
+  .unicode-link svg { flex-shrink: 0; }
+
+  /* REJECTION SECTION */
+  #rejection-section {
+    display: none;
+  }
+
+  /* ACTIONS */
+  .actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 0 1rem;
+    gap: 12px;
+  }
+
+  .actions-right {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-secondary:hover { color: var(--text); border-color: var(--text3); }
+
+  .btn-ghost {
+    background: none;
+    color: var(--text3);
+    border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { color: var(--text2); border-color: var(--border2); }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(120%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 200;
+    max-width: 360px;
+  }
+  .notif.show { transform: translateY(0); }
+  .notif.success { border-left: 3px solid var(--success); }
+  .notif.error { border-left: 3px solid var(--error); }
+  .notif.info { border-left: 3px solid var(--info); }
+
+  /* GUIDE */
+  .guide-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text3);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    padding: 0;
+  }
+  .guide-toggle:hover { color: var(--text2); }
+
+  .guide-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+  .guide-panel.open { display: block; }
+
+  .guide-panel h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .guide-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .guide-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .guide-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text2);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .guide-step-text {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .guide-step-text strong { color: var(--text); font-weight: 500; }
+  .guide-step-text code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+  }
+
+  .csv-preview {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    overflow-x: auto;
+    white-space: nowrap;
+    margin-top: 8px;
+  }
+
+  /* LOADING */
+  .spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-overlay p { font-size: 13px; color: var(--text2); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid.triple { grid-template-columns: 1fr 1fr; }
+    .span2 { grid-column: span 1; }
+    .steps { flex-direction: column; }
+    .step { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-mark">Q</div>
+      <span class="logo-text">Qwello</span>
+    </div>
+    <h1>Site Import Tool</h1>
+    <p>Neue Standorte direkt in SiteTracker anlegen — mit geführtem Formular und automatischer Validierung.</p>
+    <button class="btn-login" onclick="startLogin()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      Mit Salesforce anmelden
+    </button>
+    <p class="login-note">Login über euren Qwello Salesforce Account. Nur Qwello-Mitarbeiter mit gültigem Account haben Zugriff.</p>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <div class="logo-mark">Q</div>
+        <span class="logo-text">Site Import</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="user-badge">
+        <div class="user-dot"></div>
+        <span id="user-name">–</span>
+      </div>
+      <button class="btn-logout" onclick="logout()">Abmelden</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <h2>Neuen Standort anlegen</h2>
+      <p>Fülle das Formular aus und exportiere die CSV-Datei für den Import über Salesforce Inspector.</p>
+    </div>
+
+    <!-- STEPS -->
+    <div class="steps">
+      <div class="step active" id="step-1">
+        <div class="step-num">1</div>
+        <div class="step-label">Formular ausfüllen</div>
+      </div>
+      <div class="step" id="step-2">
+        <div class="step-num">2</div>
+        <div class="step-label">CSV exportieren</div>
+      </div>
+      <div class="step" id="step-3">
+        <div class="step-num">3</div>
+        <div class="step-label">In Salesforce importieren</div>
+      </div>
+    </div>
+
+    <!-- GUIDE TOGGLE -->
+    <button class="guide-toggle" onclick="toggleGuide()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      Anleitung für Salesforce Inspector anzeigen
+    </button>
+
+    <div class="guide-panel" id="guide-panel">
+      <h3>So importierst du die CSV in Salesforce Inspector</h3>
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-text">Formular ausfüllen und auf <strong>CSV exportieren</strong> klicken — die Datei wird automatisch heruntergeladen.</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-text">Salesforce Inspector Reloaded öffnen (Chrome Extension, blaues Icon oben rechts) → <strong>Import / Export Data</strong>.</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-text">Oben <strong>Object: <code>sitetracker__Site__c</code></strong> auswählen, Action: <strong>Insert</strong>.</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-text">CSV-Datei in das Feld ziehen oder hochladen. Die Spaltenköpfe werden automatisch erkannt.</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">5</div>
+          <div class="guide-step-text">Auf <strong>Import</strong> klicken. Bei Erfolg erscheint eine grüne Bestätigung mit der neuen Record-ID.</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-step-num">6</div>
+          <div class="guide-step-text">Fehler? Screenshot machen und an <strong>wgu@qwello.de</strong> schicken.</div>
+        </div>
+      </div>
+      <div class="csv-preview" id="csv-preview-example">Wird nach dem Ausfüllen hier angezeigt…</div>
+    </div>
+
+    <!-- SECTION 1: GRUNDDATEN -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">📍</div>
+        <span class="section-title">Grunddaten</span>
+        <span class="section-subtitle">Pflichtfelder</span>
+      </div>
+      <div class="form-grid">
+        <!-- Program Lookup -->
+        <div class="field" id="field-program">
+          <label>Program <span class="req">*</span></label>
+          <div class="lookup-wrap">
+            <input type="text" id="program-search" class="lookup-input" placeholder="Programmname eingeben…" oninput="searchLookup('program', this.value)" autocomplete="off">
+            <span class="lookup-status" id="program-status"></span>
+            <div class="lookup-results" id="program-results"></div>
+          </div>
+          <input type="hidden" id="program-id">
+          <span class="error-msg">Pflichtfeld – bitte Programm auswählen</span>
+        </div>
+
+        <!-- Site Name -->
+        <div class="field" id="field-name">
+          <label>Site Name <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="z.B. DE-MUC-001">
+          <span class="error-msg">Pflichtfeld</span>
+        </div>
+
+        <!-- Site Status (legacy) -->
+        <div class="field" id="field-sitetracker-status">
+          <label>Site Status (SiteTracker) <span class="req">*</span></label>
+          <select id="f-sitetracker-status">
+            <option value="">– auswählen –</option>
+            <option>Imported and Reserve</option>
+            <option>Live</option>
+            <option>In Contract Negotiation</option>
+            <option>Built Up - Not Live</option>
+            <option>Under Contract</option>
+            <option>Rejected</option>
+            <option>Location Concept</option>
+            <option>All Permits on Hand</option>
+            <option>Backlog</option>
+            <option>Decommissioned</option>
+            <option>PowerRacing</option>
+            <option>Submitted</option>
+            <option>Open</option>
+          </select>
+          <span class="error-msg">Pflichtfeld</span>
+        </div>
+
+        <!-- Site Status 2026 -->
+        <div class="field" id="field-status2026">
+          <label>Site Status 2026 <span class="req">*</span></label>
+          <select id="f-status2026" onchange="handleStatus2026Change(this.value)">
+            <option value="">– auswählen –</option>
+            <option>Live</option>
+            <option>Rejected</option>
+            <option>Development</option>
+            <option>Live & Under Development</option>
+            <option>Evaluation</option>
+            <option>Decommissioned</option>
+          </select>
+          <span class="error-msg">Pflichtfeld</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: STANDORT -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">🗺️</div>
+        <span class="section-title">Standort & Adresse</span>
+      </div>
+      <div class="form-grid">
+        <!-- Country -->
+        <div class="field" id="field-country">
+          <label>Land <span class="req">*</span></label>
+          <select id="f-country" onchange="handleCountryChange(this.value)">
+            <option value="">– auswählen –</option>
+            <option>Denmark</option>
+            <option>Spain</option>
+            <option>Sweden</option>
+            <option>UK</option>
+            <option>France</option>
+            <option>Germany</option>
+            <option>Poland</option>
+          </select>
+          <span class="error-msg">Pflichtfeld</span>
+        </div>
+
+        <!-- City -->
+        <div class="field" id="field-city">
+          <label>Stadt <span class="req">*</span></label>
+          <input type="text" id="f-city" placeholder="z.B. München">
+          <span class="error-msg">Pflichtfeld</span>
+        </div>
+
+        <!-- Unicode -->
+        <div class="field" id="field-unicode">
+          <label>Unicode ID <span class="req">*</span></label>
+          <input type="text" id="f-unicode" placeholder="z.B. DEMUC" maxlength="10">
+          <a class="unicode-link" id="unicode-link" href="#" target="_blank" style="display:none;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+            UNECE-Liste für dieses Land öffnen
+          </a>
+          <span class="field-hint">Aus der offiziellen UNECE-Liste für das gewählte Land auswählen</span>
+          <span class="error-msg">Pflichtfeld</span>
+        </div>
+
+        <!-- Street -->
+        <div class="field">
+          <label>Straße</label>
+          <input type="text" id="f-street" placeholder="Straße und Hausnummer">
+        </div>
+
+        <!-- ZIP -->
+        <div class="field">
+          <label>PLZ</label>
+          <input type="text" id="f-zip" placeholder="z.B. 80333">
+        </div>
+
+        <!-- State -->
+        <div class="field">
+          <label>Bundesland / Region</label>
+          <input type="text" id="f-state" placeholder="z.B. Bayern">
+        </div>
+
+        <!-- Admin District -->
+        <div class="field">
+          <label>Administrative District</label>
+          <input type="text" id="f-admin" placeholder="">
+        </div>
+
+        <!-- Region -->
+        <div class="field">
+          <label>Region</label>
+          <input type="text" id="f-region" placeholder="">
+        </div>
+
+        <!-- Lat -->
+        <div class="field" id="field-lat">
+          <label>Breitengrad (Lat) <span class="req">*</span></label>
+          <input type="number" id="f-lat" placeholder="z.B. 48.137154" step="any">
+          <span class="error-msg">Pflichtfeld – Dezimalzahl</span>
+        </div>
+
+        <!-- Long -->
+        <div class="field" id="field-long">
+          <label>Längengrad (Long) <span class="req">*</span></label>
+          <input type="number" id="f-long" placeholder="z.B. 11.576124" step="any">
+          <span class="error-msg">Pflichtfeld – Dezimalzahl</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: VERANTWORTLICHE -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">👤</div>
+        <span class="section-title">Verantwortliche</span>
+      </div>
+      <div class="form-grid">
+        <!-- Sales Manager -->
+        <div class="field" id="field-sales">
+          <label>Sales Manager <span class="req">*</span></label>
+          <div class="lookup-wrap">
+            <input type="text" id="sales-search" class="lookup-input" placeholder="Name eingeben…" oninput="searchLookup('user-sales', this.value)" autocomplete="off">
+            <span class="lookup-status" id="user-sales-status"></span>
+            <div class="lookup-results" id="user-sales-results"></div>
+          </div>
+          <input type="hidden" id="sales-id">
+          <span class="error-msg">Pflichtfeld – Person aus Liste auswählen</span>
+        </div>
+
+        <!-- Project Manager -->
+        <div class="field" id="field-pm">
+          <label>Project Manager <span class="req">*</span></label>
+          <div class="lookup-wrap">
+            <input type="text" id="pm-search" class="lookup-input" placeholder="Name eingeben…" oninput="searchLookup('user-pm', this.value)" autocomplete="off">
+            <span class="lookup-status" id="user-pm-status"></span>
+            <div class="lookup-results" id="user-pm-results"></div>
+          </div>
+          <input type="hidden" id="pm-id">
+          <span class="error-msg">Pflichtfeld – Person aus Liste auswählen</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: TECHNISCHE DATEN -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">⚡</div>
+        <span class="section-title">Technische Daten</span>
+        <span class="section-subtitle">Optional</span>
+      </div>
+      <div class="form-grid triple">
+        <div class="field">
+          <label>Pole Model</label>
+          <select id="f-pole-model">
+            <option value="">–</option>
+            <option>CP05</option>
+            <option>CP07</option>
+            <option>CP21</option>
+            <option>CP06</option>
+            <option>Ecotap Duo Wide</option>
+            <option>Autel DC50</option>
+            <option>Autel DH240</option>
+            <option>tba</option>
+            <option>CP22</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Anzahl Poles</label>
+          <input type="number" id="f-poles" placeholder="z.B. 2" min="0">
+        </div>
+        <div class="field">
+          <label>Location Concept Score</label>
+          <input type="number" id="f-concept-score" placeholder="z.B. 75" min="0" max="100">
+        </div>
+        <div class="field">
+          <label>Location Design</label>
+          <select id="f-location-design">
+            <option value="">–</option>
+            <option>Perpendicular</option>
+            <option>Longitudinal</option>
+            <option>Diagonal</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Location Setup</label>
+          <select id="f-location-setup">
+            <option value="">–</option>
+            <option>Covered Car Park</option>
+            <option>Other</option>
+            <option>Island</option>
+            <option>Pavement</option>
+            <option>Car Park</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Allowed Parking Time</label>
+          <input type="text" id="f-parking-time" placeholder="z.B. 90 min">
+        </div>
+        <div class="field">
+          <label>Sidewalk Width (m)</label>
+          <input type="number" id="f-sidewalk" placeholder="z.B. 3.5" step="0.1" min="0">
+        </div>
+        <div class="field">
+          <label>Parking Space Length (m)</label>
+          <input type="number" id="f-parking-len" placeholder="z.B. 5.0" step="0.1" min="0">
+        </div>
+        <div class="field">
+          <label>Parking Space Width (m)</label>
+          <input type="number" id="f-parking-wid" placeholder="z.B. 2.5" step="0.1" min="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: VERTRAG -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon">📄</div>
+        <span class="section-title">Vertrag</span>
+        <span class="section-subtitle">Optional</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Contract End Date</label>
+          <input type="date" id="f-contract-end">
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6: REJECTION (nur wenn Status = Rejected) -->
+    <div class="form-section" id="rejection-section">
+      <div class="section-header">
+        <div class="section-icon">❌</div>
+        <span class="section-title">Rejection</span>
+        <span class="section-subtitle">Erforderlich wenn Status = Rejected</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Rejection Actor</label>
+          <select id="f-rejection-actor">
+            <option value="">–</option>
+            <option>City</option>
+            <option>Qwello</option>
+            <option>Grid Provider</option>
+            <option>City District</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Rejection Reason</label>
+          <select id="f-rejection-reason">
+            <option value="">–</option>
+            <option>Parking restrictions</option>
+            <option>Bicycle Road</option>
+            <option>Tree Protection</option>
+            <option>Narrow Parkingspace</option>
+            <option>Monument Protection</option>
+            <option>Narrow Pavement</option>
+            <option>Grid Capacity</option>
+            <option>Other</option>
+            <option>Other Operator</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Rejection Date</label>
+          <input type="date" id="f-rejection-date">
+        </div>
+        <div class="field span2">
+          <label>Rejection Reason Description</label>
+          <textarea id="f-rejection-desc" placeholder="Detaillierte Beschreibung…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions-bar">
+      <button class="btn btn-ghost" onclick="resetForm()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/></svg>
+        Zurücksetzen
+      </button>
+      <div class="actions-right">
+        <button class="btn btn-secondary" onclick="previewCSV()">
+          Vorschau
+        </button>
+        <button class="btn btn-primary" onclick="exportCSV()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          CSV exportieren
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner" style="width:28px;height:28px;border-width:3px;"></div>
+  <p id="loading-text">Lade Daten…</p>
+</div>
+
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const SF_DOMAIN = 'https://sitetracker-qwello.my.salesforce.com';
+const CLIENT_ID = '3MVG92fFMZeJeHJdodQ_Lga8Dk2Nnl9BeHVD2dMF7By6.4pSxBcLtlpFtSla3sFs7XS4rAwltO3VZW8tCsGn3';
+const REDIRECT_URI = 'https://wolfster.github.io/qwello-site-import/callback.html';
+const PAGES_BASE = 'https://wolfster.github.io/qwello-site-import';
+
+const UNECE_URLS = {
+  'Germany': 'https://service.unece.org/trade/locode/de.htm',
+  'Poland': 'https://service.unece.org/trade/locode/pl.htm',
+  'Denmark': 'https://service.unece.org/trade/locode/dk.htm',
+  'Sweden': 'https://service.unece.org/trade/locode/se.htm',
+  'Spain': 'https://service.unece.org/trade/locode/es.htm',
+  'France': 'https://service.unece.org/trade/locode/fr.htm',
+  'UK': 'https://service.unece.org/trade/locode/gb.htm',
+};
+
+// ============================================================
+// AUTH
+// ============================================================
+function generateCodeVerifier() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  return btoa(String.fromCharCode(...arr)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function generateCodeChallenge(verifier) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function startLogin() {
+  const verifier = generateCodeVerifier();
+  const challenge = await generateCodeChallenge(verifier);
+  sessionStorage.setItem('pkce_verifier', verifier);
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    scope: 'api id',
+    code_challenge: challenge,
+    code_challenge_method: 'S256',
+  });
+
+  window.location.href = `${SF_DOMAIN}/services/oauth2/authorize?${params}`;
+}
+
+async function exchangeCode(code) {
+  const verifier = sessionStorage.getItem('pkce_verifier');
+  const body = new URLSearchParams({
+    grant_type: 'authorization_code',
+    client_id: CLIENT_ID,
+    redirect_uri: REDIRECT_URI,
+    code,
+    code_verifier: verifier,
+  });
+
+  const res = await fetch(`${SF_DOMAIN}/services/oauth2/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+
+  return res.json();
+}
+
+function getToken() { return sessionStorage.getItem('sf_token'); }
+function getInstanceUrl() { return sessionStorage.getItem('sf_instance') || SF_DOMAIN; }
+
+function logout() {
+  sessionStorage.clear();
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
+async function initApp(token, instanceUrl, userInfo) {
+  sessionStorage.setItem('sf_token', token);
+  sessionStorage.setItem('sf_instance', instanceUrl);
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-name').textContent = userInfo?.name || userInfo?.email || 'Angemeldet';
+
+  showNotif('Erfolgreich angemeldet ✓', 'success');
+}
+
+// Check for OAuth callback
+async function checkCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const token = params.get('token'); // passed from callback.html
+  const instanceUrl = params.get('instance_url');
+  const userName = params.get('user_name');
+
+  if (token) {
+    // Came back from callback page
+    const info = { name: decodeURIComponent(userName || '') };
+    await initApp(token, decodeURIComponent(instanceUrl || SF_DOMAIN), info);
+    window.history.replaceState({}, '', window.location.pathname);
+    return;
+  }
+
+  // Check existing session
+  const existingToken = getToken();
+  if (existingToken) {
+    const name = sessionStorage.getItem('sf_user') || '';
+    await initApp(existingToken, getInstanceUrl(), { name });
+  }
+}
+
+// ============================================================
+// LOOKUP SEARCH
+// ============================================================
+let lookupTimers = {};
+
+async function searchLookup(type, query) {
+  clearTimeout(lookupTimers[type]);
+  if (query.length < 2) {
+    closeLookup(type);
+    return;
+  }
+
+  lookupTimers[type] = setTimeout(async () => {
+    const status = document.getElementById(`${type}-status`);
+    status.innerHTML = '<div class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block;"></div>';
+
+    try {
+      let soql, nameField, labelField;
+
+      if (type === 'program') {
+        soql = `SELECT Id, Name FROM sitetracker__Program__c WHERE Name LIKE '%${query.replace(/'/g,"\\'")}%' ORDER BY Name LIMIT 10`;
+        nameField = 'Name';
+      } else if (type === 'user-sales' || type === 'user-pm') {
+        soql = `SELECT Id, Name, Email FROM User WHERE (Name LIKE '%${query.replace(/'/g,"\\'")}%' OR Email LIKE '%${query.replace(/'/g,"\\'")}%') AND IsActive = true ORDER BY Name LIMIT 10`;
+        nameField = 'Name';
+      }
+
+      const url = `${getInstanceUrl()}/services/data/v59.0/query?q=${encodeURIComponent(soql)}`;
+      const res = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }
+      });
+
+      const data = await res.json();
+      status.textContent = '';
+      renderLookupResults(type, data.records || [], nameField);
+
+    } catch (e) {
+      status.textContent = '✗';
+      status.style.color = 'var(--error)';
+    }
+  }, 350);
+}
+
+function renderLookupResults(type, records, nameField) {
+  const el = document.getElementById(`${type}-results`);
+  if (!el) return;
+
+  if (!records.length) {
+    el.innerHTML = '<div class="lookup-item-empty">Keine Ergebnisse</div>';
+    el.classList.add('open');
+    return;
+  }
+
+  el.innerHTML = records.map(r => `
+    <div class="lookup-item" onclick="selectLookup('${type}', '${r.Id}', ${JSON.stringify(r[nameField])})">
+      <div class="lookup-item-name">${r[nameField]}${r.Email ? ` <span style="color:var(--text3);font-size:11px;">(${r.Email})</span>` : ''}</div>
+      <div class="lookup-item-id">${r.Id}</div>
+    </div>
+  `).join('');
+  el.classList.add('open');
+}
+
+function selectLookup(type, id, name) {
+  closeLookup(type);
+
+  if (type === 'program') {
+    document.getElementById('program-search').value = name;
+    document.getElementById('program-id').value = id;
+    clearFieldError('field-program');
+  } else if (type === 'user-sales') {
+    document.getElementById('sales-search').value = name;
+    document.getElementById('sales-id').value = id;
+    clearFieldError('field-sales');
+  } else if (type === 'user-pm') {
+    document.getElementById('pm-search').value = name;
+    document.getElementById('pm-id').value = id;
+    clearFieldError('field-pm');
+  }
+}
+
+function closeLookup(type) {
+  const el = document.getElementById(`${type}-results`);
+  if (el) el.classList.remove('open');
+}
+
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  ['program', 'user-sales', 'user-pm'].forEach(type => {
+    const results = document.getElementById(`${type}-results`);
+    const input = document.getElementById(type === 'program' ? 'program-search' : type === 'user-sales' ? 'sales-search' : 'pm-search');
+    if (results && input && !results.contains(e.target) && e.target !== input) {
+      results.classList.remove('open');
+    }
+  });
+});
+
+// ============================================================
+// FORM LOGIC
+// ============================================================
+function handleCountryChange(country) {
+  const link = document.getElementById('unicode-link');
+  const url = UNECE_URLS[country];
+  if (url) {
+    link.href = url;
+    link.style.display = 'inline-flex';
+  } else {
+    link.style.display = 'none';
+  }
+}
+
+function handleStatus2026Change(val) {
+  const section = document.getElementById('rejection-section');
+  section.style.display = val === 'Rejected' ? 'block' : 'none';
+}
+
+function toggleGuide() {
+  const panel = document.getElementById('guide-panel');
+  panel.classList.toggle('open');
+}
+
+// ============================================================
+// VALIDATION
+// ============================================================
+function setFieldError(fieldId, hasError) {
+  const el = document.getElementById(fieldId);
+  if (el) el.classList.toggle('has-error', hasError);
+}
+
+function clearFieldError(fieldId) {
+  const el = document.getElementById(fieldId);
+  if (el) el.classList.remove('has-error');
+}
+
+function validate() {
+  let valid = true;
+
+  const required = [
+    { fieldId: 'field-program', getValue: () => document.getElementById('program-id').value },
+    { fieldId: 'field-name', getValue: () => document.getElementById('f-name').value.trim() },
+    { fieldId: 'field-sitetracker-status', getValue: () => document.getElementById('f-sitetracker-status').value },
+    { fieldId: 'field-status2026', getValue: () => document.getElementById('f-status2026').value },
+    { fieldId: 'field-country', getValue: () => document.getElementById('f-country').value },
+    { fieldId: 'field-city', getValue: () => document.getElementById('f-city').value.trim() },
+    { fieldId: 'field-unicode', getValue: () => document.getElementById('f-unicode').value.trim() },
+    { fieldId: 'field-lat', getValue: () => document.getElementById('f-lat').value },
+    { fieldId: 'field-long', getValue: () => document.getElementById('f-long').value },
+    { fieldId: 'field-sales', getValue: () => document.getElementById('sales-id').value },
+    { fieldId: 'field-pm', getValue: () => document.getElementById('pm-id').value },
+  ];
+
+  required.forEach(({ fieldId, getValue }) => {
+    const hasError = !getValue();
+    setFieldError(fieldId, hasError);
+    if (hasError) valid = false;
+  });
+
+  return valid;
+}
+
+// ============================================================
+// CSV EXPORT
+// ============================================================
+function buildRow() {
+  const v = (id) => document.getElementById(id)?.value || '';
+  const row = {
+    'Name': v('f-name'),
+    'Program__c': v('program-id'),
+    'sitetracker__Site_Status__c': v('f-sitetracker-status'),
+    'Site_Status_2026__c': v('f-status2026'),
+    'Country__c': v('f-country'),
+    'City__c': v('f-city'),
+    'Unicode_ID__c': v('f-unicode'),
+    'sitetracker__Street_Address__c': v('f-street'),
+    'sitetracker__Zip_Code__c': v('f-zip'),
+    'State__c': v('f-state'),
+    'Administrative_District__c': v('f-admin'),
+    'Region__c': v('f-region'),
+    'sitetracker__Lat__c': v('f-lat'),
+    'sitetracker__Long__c': v('f-long'),
+    'Location_Concept_Score__c': v('f-concept-score'),
+    'Sales_Manager__c': v('sales-id'),
+    'Project_Manager__c': v('pm-id'),
+    'Pole_Model__c': v('f-pole-model'),
+    'Number_of_poles__c': v('f-poles'),
+    'Location_Design__c': v('f-location-design'),
+    'Location_Setup__c': v('f-location-setup'),
+    'Sidewalk_width__c': v('f-sidewalk'),
+    'Parking_space_length__c': v('f-parking-len'),
+    'Parking_space_width__c': v('f-parking-wid'),
+    'Allowed_Parking_Time__c': v('f-parking-time'),
+    'Contract_End_Date__c': v('f-contract-end'),
+    'Rejection_Actor__c': v('f-rejection-actor'),
+    'Rejection_Reason__c': v('f-rejection-reason'),
+    'Rejection_Date__c': v('f-rejection-date'),
+    'Rejection_Reason_Description__c': v('f-rejection-desc'),
+  };
+
+  // Remove empty optional fields
+  Object.keys(row).forEach(k => {
+    if (!row[k]) delete row[k];
+  });
+
+  return row;
+}
+
+function rowToCSV(row) {
+  const headers = Object.keys(row);
+  const values = headers.map(h => {
+    const val = String(row[h] || '').replace(/"/g, '""');
+    return val.includes(',') || val.includes('"') || val.includes('\n') ? `"${val}"` : val;
+  });
+  return headers.join(',') + '\n' + values.join(',');
+}
+
+function previewCSV() {
+  const row = buildRow();
+  const csv = rowToCSV(row);
+  const preview = document.getElementById('csv-preview-example');
+  preview.textContent = csv;
+
+  const panel = document.getElementById('guide-panel');
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth' });
+}
+
+function exportCSV() {
+  if (!validate()) {
+    showNotif('Bitte alle Pflichtfelder ausfüllen', 'error');
+    // Scroll to first error
+    const firstErr = document.querySelector('.has-error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const row = buildRow();
+  const csv = rowToCSV(row);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const siteName = document.getElementById('f-name').value || 'site';
+  a.href = url;
+  a.download = `site-import_${siteName}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // Update steps
+  document.getElementById('step-1').classList.remove('active');
+  document.getElementById('step-1').classList.add('done');
+  document.getElementById('step-2').classList.add('active');
+
+  showNotif('CSV exportiert — jetzt in Salesforce Inspector importieren ✓', 'success');
+}
+
+function resetForm() {
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type !== 'hidden') el.value = '';
+  });
+  document.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+  document.getElementById('rejection-section').style.display = 'none';
+  document.getElementById('unicode-link').style.display = 'none';
+  showNotif('Formular zurückgesetzt', 'info');
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+let notifTimer;
+function showNotif(msg, type = 'info') {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.className = `notif ${type} show`;
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function showLoading(text = 'Lade…') {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading').classList.add('show');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+checkCallback();
+</script>
+</body>
+</html>

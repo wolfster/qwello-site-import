@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwello Site Import – Anmeldung…</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f0f;
+    color: #f0f0f0;
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #2e2e2e;
+    border-top-color: #f0b429;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  p { font-size: 13px; color: #888; }
+  .err { color: #e05252; font-size: 13px; max-width: 400px; text-align: center; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="spinner"></div>
+<p id="msg">Anmeldung läuft…</p>
+
+<script>
+const SF_DOMAIN = 'https://sitetracker-qwello.my.salesforce.com';
+const CLIENT_ID = '3MVG92fFMZeJeHJdodQ_Lga8Dk2Nnl9BeHVD2dMF7By6.4pSxBcLtlpFtSla3sFs7XS4rAwltO3VZW8tCsGn3';
+const REDIRECT_URI = 'https://wolfster.github.io/qwello-site-import/callback.html';
+const INDEX = 'https://wolfster.github.io/qwello-site-import/index.html';
+
+async function run() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const error = params.get('error');
+
+  if (error) {
+    document.getElementById('msg').className = 'err';
+    document.getElementById('msg').textContent = `Fehler bei der Anmeldung: ${error}. Bitte Seite neu laden und erneut versuchen.`;
+    return;
+  }
+
+  if (!code) {
+    window.location.href = INDEX;
+    return;
+  }
+
+  const verifier = sessionStorage.getItem('pkce_verifier');
+
+  try {
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: CLIENT_ID,
+      redirect_uri: REDIRECT_URI,
+      code,
+      code_verifier: verifier,
+    });
+
+    const res = await fetch(`${SF_DOMAIN}/services/oauth2/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+
+    const data = await res.json();
+
+    if (data.access_token) {
+      sessionStorage.setItem('sf_token', data.access_token);
+      sessionStorage.setItem('sf_instance', data.instance_url || SF_DOMAIN);
+
+      // Get user info
+      try {
+        const uRes = await fetch(data.id, {
+          headers: { 'Authorization': `Bearer ${data.access_token}` }
+        });
+        const uData = await uRes.json();
+        sessionStorage.setItem('sf_user', uData.display_name || uData.name || '');
+      } catch(e) {}
+
+      window.location.href = INDEX;
+    } else {
+      throw new Error(data.error_description || JSON.stringify(data));
+    }
+  } catch(e) {
+    document.getElementById('msg').className = 'err';
+    document.getElementById('msg').textContent = `Fehler: ${e.message}. Bitte zurück gehen und erneut versuchen.`;
+  }
+}
+
+run();
+</script>
+</body>
+</html>
