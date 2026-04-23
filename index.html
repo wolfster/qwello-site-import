@@ -30,16 +30,52 @@
 body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }
 
 /* ── LOGIN ── */
-#login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
-.login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 3rem; width: 100%; max-width: 420px; text-align: center; }
-.logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+#login-screen { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 2rem; padding-top: 3rem; }
+.login-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem; width: 100%; max-width: 480px; text-align: center; }
+.logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
 .logo-mark { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; color: #000; }
 .logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-.login-card h1 { font-size: 22px; font-weight: 500; margin-bottom: 0.5rem; letter-spacing: -0.4px; }
-.login-card > p { color: var(--text2); font-size: 13px; margin-bottom: 2rem; line-height: 1.6; }
+.login-card h1 { font-size: 20px; font-weight: 500; margin-bottom: 0.3rem; letter-spacing: -0.4px; }
+.login-card > p { color: var(--text2); font-size: 13px; margin-bottom: 1.5rem; line-height: 1.6; }
 .btn-login { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 20px; background: var(--accent); color: #000; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
 .btn-login:hover { background: var(--accent2); }
 .login-note { margin-top: 1.5rem; font-size: 12px; color: var(--text3); line-height: 1.6; }
+
+/* ── LOGIN GUIDE STEPS ── */
+.guide-steps { display: flex; flex-direction: column; gap: 14px; margin: 1.25rem 0; text-align: left; }
+.guide-step { display: flex; gap: 12px; align-items: flex-start; }
+.guide-step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #000; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.guide-step-body { flex: 1; min-width: 0; }
+.guide-step-label { font-size: 12px; color: var(--text2); line-height: 1.5; margin-top: 6px; }
+.guide-step-label strong { color: var(--text); }
+
+/* Chrome toolbar mockup */
+.mock-toolbar { background: #232323; border-radius: 6px; padding: 5px 8px; display: flex; align-items: center; gap: 6px; border: 1px solid #333; }
+.mock-toolbar-dots { display: flex; gap: 4px; }
+.mock-toolbar-dot { width: 7px; height: 7px; border-radius: 50%; }
+.mock-toolbar-url { flex: 1; background: #141414; border-radius: 4px; padding: 3px 8px; font-size: 9px; color: #555; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mock-toolbar-ext { display: flex; align-items: center; gap: 4px; }
+.mock-ext-icon { width: 22px; height: 22px; background: var(--accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 0 0 3px rgba(240,180,41,0.3); animation: glow-icon 2s ease-in-out infinite; }
+@keyframes glow-icon { 0%,100% { box-shadow: 0 0 0 3px rgba(240,180,41,0.3); } 50% { box-shadow: 0 0 0 5px rgba(240,180,41,0.1); } }
+
+/* SF Inspector popup mockup */
+.mock-popup { background: #1c1c1c; border: 1px solid #383838; border-radius: 6px; overflow: hidden; }
+.mock-popup-header { background: #141414; padding: 7px 10px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid #2c2c2c; }
+.mock-popup-logo { width: 14px; height: 14px; background: #00a1e0; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #fff; font-weight: 700; flex-shrink: 0; }
+.mock-popup-title { font-size: 10px; font-weight: 600; color: #aaa; }
+.mock-popup-body { padding: 9px 10px; }
+.mock-session-row { display: flex; align-items: center; gap: 6px; }
+.mock-session-label { font-size: 9px; color: #555; white-space: nowrap; flex-shrink: 0; }
+.mock-session-value { flex: 1; background: #111; border: 1px solid #2c2c2c; border-radius: 3px; padding: 3px 6px; font-size: 8px; color: #444; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; min-width: 0; }
+.mock-copy-btn { background: var(--accent); color: #000; border: none; border-radius: 3px; padding: 4px 9px; font-size: 9px; font-weight: 700; cursor: default; white-space: nowrap; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(240,180,41,0.4); animation: pulse-btn 2s ease-in-out infinite; }
+@keyframes pulse-btn { 0%,100% { box-shadow: 0 0 0 2px rgba(240,180,41,0.4); } 50% { box-shadow: 0 0 0 5px rgba(240,180,41,0.1); } }
+
+/* Paste field mockup */
+.mock-paste-field { background: #141414; border: 1px solid var(--accent); border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; }
+.mock-paste-label { font-size: 8px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; }
+.mock-paste-value { flex: 1; font-size: 8px; color: #3a3a3a; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; min-width: 0; }
+.mock-paste-cursor { width: 1px; height: 11px; background: var(--accent); flex-shrink: 0; animation: blink-cursor 1s ease-in-out infinite; }
+@keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
 /* ── APP SHELL ── */
 #app-screen { display: none; }
@@ -239,24 +275,64 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
     <!-- Token login -->
     <div id="login-step-1">
       <h1>Site Import Tool</h1>
-      <p>Melde dich mit deinem Salesforce Session-Token an. Den Token findest du im <strong style="color:var(--text);">Salesforce Inspector</strong> oben rechts.</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:0;">Melde dich mit deinem Salesforce Session-Token an — so geht's:</p>
 
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:1.25rem 0;text-align:left;">
-        <div style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">So geht's</div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
-            <span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</span>
-            Salesforce Inspector im Browser öffnen (Chrome Extension)
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
-            <span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</span>
-            Oben auf <strong style="color:var(--text);">"Copy Token"</strong> klicken
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text2);">
-            <span style="background:var(--accent);color:#000;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</span>
-            Token hier einfügen und verbinden
+      <div class="guide-steps">
+
+        <!-- Step 1: Chrome öffnen -->
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-body">
+            <div class="mock-toolbar">
+              <div class="mock-toolbar-dots">
+                <div class="mock-toolbar-dot" style="background:#c0392b;"></div>
+                <div class="mock-toolbar-dot" style="background:#e67e22;"></div>
+                <div class="mock-toolbar-dot" style="background:#27ae60;"></div>
+              </div>
+              <div class="mock-toolbar-url">sitetracker-qwello.my.salesforce.com</div>
+              <div class="mock-toolbar-ext">
+                <div style="width:22px;height:22px;background:#444;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">⋯</div>
+                <div class="mock-ext-icon">⚡</div>
+              </div>
+            </div>
+            <div class="guide-step-label">Salesforce in Chrome öffnen → auf das <strong>⚡ Salesforce Inspector</strong> Icon rechts oben in der Browser-Leiste klicken</div>
           </div>
         </div>
+
+        <!-- Step 2: Copy klicken -->
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-body">
+            <div class="mock-popup">
+              <div class="mock-popup-header">
+                <div class="mock-popup-logo">S</div>
+                <span class="mock-popup-title">Salesforce Inspector</span>
+              </div>
+              <div class="mock-popup-body">
+                <div class="mock-session-row">
+                  <span class="mock-session-label">Session Id</span>
+                  <span class="mock-session-value">00D5g000000XXXXX!ARsAQBnm…</span>
+                  <button class="mock-copy-btn">Copy</button>
+                </div>
+              </div>
+            </div>
+            <div class="guide-step-label">Im Popup auf <strong>Copy</strong> neben "Session Id" klicken — der Token ist jetzt in der Zwischenablage</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Einfügen -->
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-body">
+            <div class="mock-paste-field">
+              <span class="mock-paste-label">Session Token</span>
+              <span class="mock-paste-value">00D5g000000XXXXX!ARsAQBnm…</span>
+              <div class="mock-paste-cursor"></div>
+            </div>
+            <div class="guide-step-label">Token unten einfügen <strong>(Strg+V&nbsp;/ Cmd+V)</strong> → <strong>Verbinden</strong> klicken</div>
+          </div>
+        </div>
+
       </div>
 
       <div class="field" style="margin-bottom:12px;text-align:left;">
@@ -281,7 +357,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 8h.01M9 15l3-3 2 2 3-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
         Demo Mode
       </button>
-      <p class="login-note">Nur für Qwello-Mitarbeiter mit aktivem Salesforce-Account.<br>Demo Mode verwendet Testdaten — keine SF-Verbindung nötig.</p>
+      <p class="login-note">Nur für Qwello-Mitarbeiter mit Salesforce-Zugang.<br>Kein SF Inspector? → IT fragen (kostenlose Chrome Extension).</p>
     </div>
   </div>
 </div>
