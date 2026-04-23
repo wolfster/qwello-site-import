@@ -1167,7 +1167,7 @@ function fillDropdowns(programs, users, label) {
 async function loadLiveData() {
   try {
     const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name FROM sitetracker__Program__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery("SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
     ]);
     if (programs.length || users.length) {
@@ -1222,7 +1222,7 @@ async function refreshCache() {
   showLoading('Lade Daten aus Salesforce…');
   try {
     const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name FROM sitetracker__Program__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery("SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
     ]);
     const cache = {
