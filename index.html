@@ -859,6 +859,7 @@ async function loginWithToken() {
     if (!res.ok) throw new Error('invalid');
     const info = await res.json();
     const name = info.display_name || info.name || info.preferred_username || 'Angemeldet';
+    if (info.user_id) sessionStorage.setItem('sf_user_id', info.user_id);
     await initApp(token, SF_DOMAIN, name);
   } catch(e) {
     document.getElementById('token-error').style.display = 'block';
@@ -924,6 +925,14 @@ async function initApp(token, instanceUrl, name) {
   const cached = sessionStorage.getItem('sf_all_fields');
   if (cached) S.allFields = JSON.parse(cached);
   await Promise.all([loadCountries(), isDemo() ? loadCache() : loadLiveData()]);
+  if (!isDemo()) {
+    const detected = await detectCountryByIP();
+    if (detected && !document.getElementById('g-country').value) {
+      document.getElementById('g-country').value = detected;
+      onCountryChange(detected);
+    }
+    autoSelectLoggedInUser();
+  }
   showNotif(isDemo() ? 'Demo mode active' : 'Signed in ✓', isDemo() ? 'warning' : 'success');
 }
 
@@ -1172,8 +1181,8 @@ const COUNTRY_ISO = {
 };
 
 function fillDropdowns(programs, users, label) {
-  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name }));
-  S.cachedUsers    = users.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, role: r.UserRole?.Name || r.role || '' }));
+  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '' }));
+  S.cachedUsers    = users.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, group: r.group || '' }));
   document.getElementById('cache-empty-warning').style.display = 'none';
   if (label) document.getElementById('cache-age').textContent = label;
   const country = document.getElementById('g-country').value;
@@ -1189,8 +1198,9 @@ function filterPrograms(query) {
   if (!S.cachedPrograms.length) { el.classList.remove('open'); return; }
   el.innerHTML = results.map(p => {
     const safe = p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}')">
-      <div class="lookup-item-name">${escHtml(p.name)}</div>
+    const safeU = (p.unlocode || '').replace(/'/g,"\\'");
+    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}','${safeU}')">
+      <div class="lookup-item-name">${escHtml(p.name)}${p.unlocode ? `<span style="color:var(--text3);font-size:10px;margin-left:6px;">${escHtml(p.unlocode)}</span>` : ''}</div>
     </div>`;
   }).join('') +
   `<div class="lookup-item" style="border-top:1px solid var(--border);" onclick="showManualProgram()">
@@ -1199,12 +1209,17 @@ function filterPrograms(query) {
   el.classList.add('open');
 }
 
-function selectProgram(id, name) {
+function selectProgram(id, name, unlocode) {
   document.getElementById('g-program-search').value = name;
   document.getElementById('g-program-id').value = id;
   document.getElementById('g-program-results').classList.remove('open');
   document.getElementById('g-program-manual-wrap').style.display = 'none';
   clearFieldError('gfield-program');
+  if (unlocode) {
+    document.getElementById('g-unicode').value = unlocode;
+    document.getElementById('unicode-city-search').value = name;
+    clearFieldError('gfield-unicode');
+  }
 }
 
 function showManualProgram() {
@@ -1217,10 +1232,7 @@ function showManualProgram() {
 
 function updateUsersByCountry(country) {
   const all = S.cachedUsers;
-  const iso = country ? (COUNTRY_ISO[country] || '').toUpperCase() : '';
-  const filtered = iso
-    ? all.filter(u => u.role && u.role.toUpperCase().includes(iso))
-    : all;
+  const filtered = country ? all.filter(u => u.group === country) : all;
   const toShow = filtered.length ? filtered : all;
   ['g-sales-select','g-pm-select'].forEach(selId => {
     const sel = document.getElementById(selId);
@@ -1231,14 +1243,36 @@ function updateUsersByCountry(country) {
   });
 }
 
+async function detectCountryByIP() {
+  try {
+    const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+    const name = d.country_name;
+    return COUNTRY_ISO[name] ? name : null;
+  } catch(e) { return null; }
+}
+
+function autoSelectLoggedInUser() {
+  const uid = sessionStorage.getItem('sf_user_id');
+  if (!uid) return;
+  ['g-sales-select', 'g-pm-select'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (sel && [...sel.options].some(o => o.value === uid)) sel.value = uid;
+  });
+}
+
 async function loadLiveData() {
   try {
-    const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery("SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true AND UserRoleId != null ORDER BY Name LIMIT 500"),
+    const COUNTRY_GROUPS = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
+    const [programs, users, groupMembers] = await Promise.all([
+      sfQuery('SELECT Id, Name, Unicode_Program__c FROM sitetracker__Program2__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
+      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS})`),
     ]);
-    if (programs.length || users.length) {
-      fillDropdowns(programs, users, `Live ✓ ${programs.length} Programme`);
+    const userGroupMap = {};
+    groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
+    const taggedUsers = users.map(u => ({ ...u, group: userGroupMap[u.Id] || '' }));
+    if (programs.length || taggedUsers.length) {
+      fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
       return;
     }
   } catch(e) { /* fall through to cache */ }
@@ -1284,14 +1318,18 @@ async function refreshCache() {
   if (isDemo()) { showNotif('Im Demo Mode nicht verfügbar', 'warning'); return; }
   showLoading('Lade Daten aus Salesforce…');
   try {
-    const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery("SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true AND UserRoleId != null ORDER BY Name LIMIT 500"),
+    const COUNTRY_GROUPS = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
+    const [programs, users, groupMembers] = await Promise.all([
+      sfQuery('SELECT Id, Name, Unicode_Program__c FROM sitetracker__Program2__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
+      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS})`),
     ]);
+    const userGroupMap = {};
+    groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
     const cache = {
       lastUpdated: new Date().toISOString().split('T')[0],
-      programs: programs.map(p => ({ id: p.Id, name: p.Name })),
-      users: users.map(u => ({ id: u.Id, name: u.Name, role: u.UserRole?.Name || '' })),
+      programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '' })),
+      users: users.map(u => ({ id: u.Id, name: u.Name, group: userGroupMap[u.Id] || '' })),
     };
     const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -1299,7 +1337,8 @@ async function refreshCache() {
     a.download = 'cache.json';
     a.click();
     hideLoading();
-    fillDropdowns(programs, users, `Live ✓ ${programs.length} Programme`);
+    const taggedUsers = users.map(u => ({ ...u, group: userGroupMap[u.Id] || '' }));
+    fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
     showNotif(`${programs.length} Programme, ${users.length} User geladen — cache.json heruntergeladen zum Pushen ins Repo`, 'success');
   } catch(e) {
     hideLoading();
