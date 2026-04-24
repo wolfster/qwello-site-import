@@ -507,6 +507,11 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 
             <div></div>
 
+            <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-bottom:-4px;">
+              <input type="checkbox" id="show-hq-users" onchange="updateUsersByCountry(document.getElementById('g-country').value)" style="width:14px;height:14px;cursor:pointer;">
+              <label for="show-hq-users" style="font-size:12px;color:var(--text3);cursor:pointer;margin:0;">HQ-User einblenden</label>
+            </div>
+
             <div class="field" id="gfield-sales">
               <label>Sales Manager <span class="req">*</span></label>
               <select id="g-sales-select" onchange="clearFieldError('gfield-sales')">
@@ -1180,7 +1185,7 @@ document.addEventListener('click', e => {
 const ROLE_COUNTRY = {
   'DE-PM':     'Germany',
   'Germany':   'Germany',
-  'Qwello HQ': 'Germany',
+  'Qwello HQ': 'HQ',
   'ES-PM':     'Spain',
   'Spain':     'Spain',
   'FR-PM':     'France',
@@ -1249,8 +1254,11 @@ function showManualProgram() {
 
 function updateUsersByCountry(country) {
   const all = S.cachedUsers;
-  const filtered = country ? all.filter(u => u.group === country) : all;
-  const toShow = filtered.length ? filtered : all;
+  const showHQ = document.getElementById('show-hq-users')?.checked;
+  const hq = all.filter(u => u.group === 'HQ');
+  const filtered = country ? all.filter(u => u.group === country) : all.filter(u => u.group !== 'HQ');
+  const pool = showHQ ? [...filtered, ...hq] : filtered;
+  const toShow = pool.length ? pool : all.filter(u => u.group !== 'HQ');
   ['g-sales-select','g-pm-select'].forEach(selId => {
     const sel = document.getElementById(selId);
     const prev = sel.value;
