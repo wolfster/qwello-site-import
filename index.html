@@ -1177,6 +1177,23 @@ document.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════════
 // CACHE: Programme & User aus cache.json laden
 // ════════════════════════════════════════════════════════════
+const ROLE_COUNTRY = {
+  'DE-PM':     'Germany',
+  'Germany':   'Germany',
+  'Qwello HQ': 'Germany',
+  'ES-PM':     'Spain',
+  'Spain':     'Spain',
+  'FR-PM':     'France',
+  'France':    'France',
+  'PL-PM':     'Poland',
+  'Poland':    'Poland',
+  'SE-PM':     'Sweden',
+  'Sweden':    'Sweden',
+  'UK':        'UK',
+  'UK-PM':     'UK',
+  'DK-PM':     'Denmark',
+  'Denmark':   'Denmark',
+};
 
 function fillDropdowns(programs, users, label) {
   S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '', country: r.Country__c || r.country || '' }));
@@ -1260,33 +1277,13 @@ function autoSelectLoggedInUser() {
   });
 }
 
-async function resolveGroupMembership() {
-  const names = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
-  const members1 = await sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${names})`);
-  const userGroupMap = {};
-  const nestedGroupMap = {};
-  members1.forEach(m => {
-    if (m.UserOrGroupId.startsWith('005')) userGroupMap[m.UserOrGroupId] = m.Group.Name;
-    else if (m.UserOrGroupId.startsWith('00G')) nestedGroupMap[m.UserOrGroupId] = m.Group.Name;
-  });
-  if (Object.keys(nestedGroupMap).length) {
-    const ids = Object.keys(nestedGroupMap).map(id => `'${id}'`).join(',');
-    const members2 = await sfQuery(`SELECT UserOrGroupId, GroupId FROM GroupMember WHERE GroupId IN (${ids})`);
-    members2.forEach(m => {
-      if (m.UserOrGroupId.startsWith('005')) userGroupMap[m.UserOrGroupId] = nestedGroupMap[m.GroupId];
-    });
-  }
-  return userGroupMap;
-}
-
 async function loadLiveData() {
   try {
-    const [programs, users, userGroupMap] = await Promise.all([
+    const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-      resolveGroupMembership(),
+      sfQuery('SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
     ]);
-    const taggedUsers = users.map(u => ({ ...u, group: userGroupMap[u.Id] || '' }));
+    const taggedUsers = users.map(u => ({ ...u, group: ROLE_COUNTRY[u.UserRole?.Name] || '' }));
     if (programs.length || taggedUsers.length) {
       fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
       return;
@@ -1334,15 +1331,15 @@ async function refreshCache() {
   if (isDemo()) { showNotif('Im Demo Mode nicht verfügbar', 'warning'); return; }
   showLoading('Lade Daten aus Salesforce…');
   try {
-    const [programs, users, userGroupMap] = await Promise.all([
+    const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-      resolveGroupMembership(),
+      sfQuery('SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
     ]);
+    const taggedUsers = users.map(u => ({ ...u, group: ROLE_COUNTRY[u.UserRole?.Name] || '' }));
     const cache = {
       lastUpdated: new Date().toISOString().split('T')[0],
       programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '', country: p.Country__c || '' })),
-      users: users.map(u => ({ id: u.Id, name: u.Name, group: userGroupMap[u.Id] || '' })),
+      users: taggedUsers.map(u => ({ id: u.Id, name: u.Name, group: u.group })),
     };
     const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -1350,7 +1347,6 @@ async function refreshCache() {
     a.download = 'cache.json';
     a.click();
     hideLoading();
-    const taggedUsers = users.map(u => ({ ...u, group: u.Country__c || '' }));
     fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
     showNotif(`${programs.length} Programme, ${users.length} User geladen — cache.json heruntergeladen zum Pushen ins Repo`, 'success');
   } catch(e) {
