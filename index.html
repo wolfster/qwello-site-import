@@ -1266,7 +1266,7 @@ async function loadLiveData() {
     const [programs, users, groupMembers] = await Promise.all([
       sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS}) AND UserOrGroup.Type = 'User'`),
+      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS}) AND UserOrGroupId IN (SELECT Id FROM User WHERE IsActive = true)`),
     ]);
     const userGroupMap = {};
     groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
@@ -1324,7 +1324,7 @@ async function refreshCache() {
     const [programs, users, groupMembers] = await Promise.all([
       sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS}) AND UserOrGroup.Type = 'User'`),
+      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS}) AND UserOrGroupId IN (SELECT Id FROM User WHERE IsActive = true)`),
     ]);
     const userGroupMap = {};
     groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
