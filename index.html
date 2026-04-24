@@ -399,7 +399,6 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <div class="user-dot"></div>
         <span id="user-name">–</span>
       </div>
-      <button id="btn-refresh-cache" class="btn-logout" onclick="refreshCache()" style="display:none;" title="Programme und User aus Salesforce neu laden und als cache.json speichern">↻ Cache aktualisieren</button>
       <button class="btn-logout" onclick="logout()">Sign out</button>
     </div>
   </div>
@@ -488,13 +487,10 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
       <div class="card" style="overflow:visible;">
         <div class="card-header"><div class="card-icon">👥</div><span class="card-title">Program &amp; Responsible Persons</span><span class="card-sub">Applies to all rows</span></div>
         <div class="card-body">
-          <div id="cache-empty-warning" style="display:none;background:var(--bg);border:1px solid var(--warning);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--warning);line-height:1.6;">
-            ⚠ Kein Cache gefunden — Programme und User können nicht geladen werden.<br>
-            <span style="color:var(--text2);">Bitte oben rechts auf <strong style="color:var(--text);">↻ Cache aktualisieren</strong> klicken (erfordert gültige Salesforce-Verbindung).</span>
-          </div>
+
           <div class="form-grid">
             <div class="field" id="gfield-program">
-              <label>Program <span class="req">*</span> <span id="cache-age" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;"></span></label>
+              <label>Program <span class="req">*</span> <span id="program-status" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;"></span></label>
               <div class="lookup-wrap">
                 <input type="text" id="g-program-search" class="lookup-input" placeholder="Programm suchen…"
                   oninput="filterPrograms(this.value)"
@@ -801,7 +797,7 @@ async function startDemo() {
   document.getElementById('btn-load-demo').style.display = 'inline-flex';
   S.countries = FALLBACK_COUNTRIES;
   populateCountrySelect();
-  await loadCache();
+  fillDropdowns([], [], '');
   showNotif('Demo mode — no data will be sent to Salesforce', 'warning');
 }
 
@@ -932,10 +928,9 @@ async function initApp(token, instanceUrl, name) {
   document.getElementById('app-screen').style.display   = 'block';
   document.getElementById('user-name').textContent = name || 'Signed in';
   if (isDemo()) document.getElementById('demo-tag').style.display = 'inline-flex';
-  if (!isDemo()) document.getElementById('btn-refresh-cache').style.display = 'inline-block';
   const cached = sessionStorage.getItem('sf_all_fields');
   if (cached) S.allFields = JSON.parse(cached);
-  await Promise.all([loadCountries(), isDemo() ? loadCache() : loadLiveData()]);
+  await Promise.all([loadCountries(), loadLiveData()]);
   if (!isDemo()) {
     const detected = await detectCountryByIP();
     if (detected && !document.getElementById('g-country').value) {
@@ -1206,8 +1201,7 @@ const ROLE_COUNTRY = {
 function fillDropdowns(programs, users, label) {
   S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '', country: r.Country__c || r.country || '', pm: r.Project_Manager__c || r.pm || '', pmName: r.Project_Manager__r?.Name || r.pmName || '', sales: r.Sales_Manager__c || r.sales || '', salesName: r.Sales_Manager__r?.Name || r.salesName || '' }));
   S.cachedUsers    = users.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, group: r.group || '' }));
-  document.getElementById('cache-empty-warning').style.display = 'none';
-  if (label) document.getElementById('cache-age').textContent = label;
+  if (label) document.getElementById('program-status').textContent = label;
   const country = document.getElementById('g-country').value;
   updateUsersByCountry(country);
 }
@@ -1313,25 +1307,10 @@ async function loadLiveData() {
       fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
       return;
     }
-  } catch(e) { console.error('[QwelloImport] loadLiveData Fehler:', e); /* fall through to cache */ }
-  await loadCache();
-}
-
-async function loadCache() {
-  try {
-    const res = await fetch('cache.json?v=' + Date.now());
-    if (!res.ok) throw new Error('not found');
-    const cache = await res.json();
-    const hasData = cache.programs?.length || cache.users?.length;
-    if (!hasData) { showCacheWarning(); return; }
-    fillDropdowns(cache.programs, cache.users, cache.lastUpdated ? `Cache: ${cache.lastUpdated}` : '');
   } catch(e) {
-    showCacheWarning();
+    console.error('[QwelloImport] loadLiveData Fehler:', e);
+    showNotif('Daten konnten nicht geladen werden — bitte Seite neu laden.', 'error');
   }
-}
-
-function showCacheWarning() {
-  document.getElementById('cache-empty-warning').style.display = 'block';
 }
 
 
@@ -1350,34 +1329,6 @@ function getProgramName() {
 function getSelectName(selId) {
   const sel = document.getElementById(selId);
   return sel?.options[sel.selectedIndex]?.text || '';
-}
-
-async function refreshCache() {
-  if (isDemo()) { showNotif('Im Demo Mode nicht verfügbar', 'warning'); return; }
-  showLoading('Lade Daten aus Salesforce…');
-  try {
-    const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c, Project_Manager__c, Project_Manager__r.Name, Sales_Manager__c, Sales_Manager__r.Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery('SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-    ]);
-    const taggedUsers = users.map(u => ({ ...u, group: ROLE_COUNTRY[u.UserRole?.Name] || '' }));
-    const cache = {
-      lastUpdated: new Date().toISOString().split('T')[0],
-      programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '', country: p.Country__c || '', pm: p.Project_Manager__c || '', pmName: p.Project_Manager__r?.Name || '', sales: p.Sales_Manager__c || '', salesName: p.Sales_Manager__r?.Name || '' })),
-      users: taggedUsers.map(u => ({ id: u.Id, name: u.Name, group: u.group })),
-    };
-    const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'cache.json';
-    a.click();
-    hideLoading();
-    fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
-    showNotif(`${programs.length} Programme, ${users.length} User geladen — cache.json heruntergeladen zum Pushen ins Repo`, 'success');
-  } catch(e) {
-    hideLoading();
-    showNotif('Fehler beim Laden: ' + e.message, 'error');
-  }
 }
 
 // ════════════════════════════════════════════════════════════

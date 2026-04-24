@@ -13,24 +13,6 @@
 
 ---
 
-## Cache aktualisieren (monatlich oder vor neuem Programm)
-
-Mit deinem Token eingeloggt: oben rechts **↻ Cache aktualisieren** klicken.  
-→ `cache.json` wird heruntergeladen (enthält alle Programme + aktive User).
-
-Dann ins Repo hochladen:
-
-```bash
-# cache.json ins Projektverzeichnis schieben, dann:
-git add cache.json
-git commit -m "Cache update $(date +%Y-%m-%d)"
-git push
-```
-
-Alle Kollegen sehen die neuen Daten beim nächsten Seitenaufruf.
-
----
-
 ## Neues Programm kurz vor Import
 
 **Option A (empfohlen):** Cache aktualisieren wie oben — sobald das Programm in SF existiert.
