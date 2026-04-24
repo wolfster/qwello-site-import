@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com https://ipapi.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self';">
 <title>Qwello Site Import</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 :root {
   --bg: #0f0f0f;
@@ -27,7 +28,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
 
 /* ── LOGIN ── */
 #login-screen { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 2rem; padding-top: 3rem; }
@@ -37,7 +38,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .logo-text { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
 .login-card h1 { font-size: 20px; font-weight: 500; margin-bottom: 0.3rem; letter-spacing: -0.4px; }
 .login-card > p { color: var(--text2); font-size: 13px; margin-bottom: 1.5rem; line-height: 1.6; }
-.btn-login { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 20px; background: var(--accent); color: #000; border: none; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+.btn-login { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 12px 20px; background: var(--accent); color: #000; border: none; border-radius: var(--radius); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
 .btn-login:hover { background: var(--accent2); }
 .login-note { margin-top: 1.5rem; font-size: 12px; color: var(--text3); line-height: 1.6; }
 
@@ -53,7 +54,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .mock-toolbar { background: #232323; border-radius: 6px; padding: 5px 8px; display: flex; align-items: center; gap: 6px; border: 1px solid #333; }
 .mock-toolbar-dots { display: flex; gap: 4px; }
 .mock-toolbar-dot { width: 7px; height: 7px; border-radius: 50%; }
-.mock-toolbar-url { flex: 1; background: #141414; border-radius: 4px; padding: 3px 8px; font-size: 9px; color: #555; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mock-toolbar-url { flex: 1; background: #141414; border-radius: 4px; padding: 3px 8px; font-size: 9px; color: #555; font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mock-toolbar-ext { display: flex; align-items: center; gap: 4px; }
 .mock-ext-icon { width: 22px; height: 22px; background: var(--accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 0 0 3px rgba(240,180,41,0.3); animation: glow-icon 2s ease-in-out infinite; }
 @keyframes glow-icon { 0%,100% { box-shadow: 0 0 0 3px rgba(240,180,41,0.3); } 50% { box-shadow: 0 0 0 5px rgba(240,180,41,0.1); } }
@@ -66,14 +67,14 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .mock-popup-body { padding: 9px 10px; }
 .mock-session-row { display: flex; align-items: center; gap: 6px; }
 .mock-session-label { font-size: 9px; color: #555; white-space: nowrap; flex-shrink: 0; }
-.mock-session-value { flex: 1; background: #111; border: 1px solid #2c2c2c; border-radius: 3px; padding: 3px 6px; font-size: 8px; color: #444; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; min-width: 0; }
+.mock-session-value { flex: 1; background: #111; border: 1px solid #2c2c2c; border-radius: 3px; padding: 3px 6px; font-size: 8px; color: #444; font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; white-space: nowrap; overflow: hidden; min-width: 0; }
 .mock-copy-btn { background: var(--accent); color: #000; border: none; border-radius: 3px; padding: 4px 9px; font-size: 9px; font-weight: 700; cursor: default; white-space: nowrap; flex-shrink: 0; box-shadow: 0 0 0 2px rgba(240,180,41,0.4); animation: pulse-btn 2s ease-in-out infinite; }
 @keyframes pulse-btn { 0%,100% { box-shadow: 0 0 0 2px rgba(240,180,41,0.4); } 50% { box-shadow: 0 0 0 5px rgba(240,180,41,0.1); } }
 
 /* Paste field mockup */
 .mock-paste-field { background: #141414; border: 1px solid var(--accent); border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; }
 .mock-paste-label { font-size: 8px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0; }
-.mock-paste-value { flex: 1; font-size: 8px; color: #3a3a3a; font-family: 'DM Mono', monospace; white-space: nowrap; overflow: hidden; min-width: 0; }
+.mock-paste-value { flex: 1; font-size: 8px; color: #3a3a3a; font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; white-space: nowrap; overflow: hidden; min-width: 0; }
 .mock-paste-cursor { width: 1px; height: 11px; background: var(--accent); flex-shrink: 0; animation: blink-cursor 1s ease-in-out infinite; }
 @keyframes blink-cursor { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 
@@ -83,7 +84,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .topbar-left { display: flex; align-items: center; gap: 12px; }
 .user-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); }
 .user-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
-.btn-logout { background: none; border: 1px solid var(--border2); color: var(--text2); padding: 5px 12px; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.btn-logout { background: none; border: 1px solid var(--border2); color: var(--text2); padding: 5px 12px; border-radius: 6px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; cursor: pointer; transition: all 0.15s; }
 .btn-logout:hover { border-color: var(--text2); color: var(--text); }
 
 /* ── WIZARD NAV ── */
@@ -120,7 +121,7 @@ body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-s
 .field { display: flex; flex-direction: column; gap: 6px; }
 label { font-size: 11px; font-weight: 500; color: var(--text2); letter-spacing: 0.04em; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
 .req { color: var(--accent); font-size: 13px; line-height: 1; }
-input[type="text"], input[type="number"], input[type="date"], select, textarea { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 9px 12px; transition: border-color 0.15s; width: 100%; outline: none; -webkit-appearance: none; }
+input[type="text"], input[type="number"], input[type="date"], select, textarea { background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; padding: 9px 12px; transition: border-color 0.15s; width: 100%; outline: none; -webkit-appearance: none; }
 input:focus, select:focus, textarea:focus { border-color: var(--accent); }
 select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; appearance: none; }
 .field.has-error input, .field.has-error select { border-color: var(--error); }
@@ -130,14 +131,14 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 /* ── LOOKUP ── */
 .lookup-wrap { position: relative; }
 .lookup-input { padding-right: 80px !important; }
-.lookup-status { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-family: 'DM Mono', monospace; pointer-events: none; }
+.lookup-status { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; pointer-events: none; }
 .lookup-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); z-index: 50; max-height: 200px; overflow-y: auto; display: none; }
 .lookup-results.open { display: block; }
 .lookup-item { padding: 9px 12px; cursor: pointer; transition: background 0.1s; border-bottom: 1px solid var(--border); }
 .lookup-item:last-child { border-bottom: none; }
 .lookup-item:hover { background: var(--surface); }
 .lookup-item-name { font-size: 13px; color: var(--text); }
-.lookup-item-sub { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; margin-top: 2px; }
+.lookup-item-sub { font-size: 10px; color: var(--text3); font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; margin-top: 2px; }
 .lookup-item-empty { padding: 12px; font-size: 12px; color: var(--text3); text-align: center; }
 
 /* ── MISC FIELD UI ── */
@@ -150,7 +151,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .btn-icon.spinning svg { animation: spin 0.6s linear infinite; }
 
 /* ── BUTTONS ── */
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
 .btn-primary { background: var(--accent); color: #000; }
 .btn-primary:hover { background: var(--accent2); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -177,7 +178,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .mapping-table th, .mapping-table td { padding: 8px 10px; text-align: left; border: 1px solid var(--border); min-width: 180px; }
 .mapping-table thead th { background: var(--surface2); color: var(--text2); font-size: 11px; font-weight: 500; }
 .mapping-table tbody td { background: var(--surface); font-size: 12px; }
-.col-original { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
+.col-original { font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 11px; color: var(--accent); }
 .col-preview { color: var(--text3); font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mapping-select { width: 100%; min-width: 190px; font-size: 12px; padding: 6px 28px 6px 8px; }
 .cfs-wrap { margin-top: 6px; position: relative; }
@@ -188,7 +189,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .cfs-item:hover { background: var(--surface); }
 .cfs-item:last-child { border-bottom: none; }
 .cfs-label { color: var(--text); }
-.cfs-api { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3); }
+.cfs-api { font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 10px; color: var(--text3); }
 .ref-warning { font-size: 10px; color: var(--warning); margin-top: 4px; }
 
 /* ── PREVIEW TABLE ── */
@@ -201,11 +202,11 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .preview-table tr:hover td { background: #1e1e1e; }
 .preview-table tr.row-error td { background: rgba(224,82,82,0.05); }
 .preview-table tr.row-error td:nth-child(2) { border-left: 3px solid var(--error); }
-.row-num { color: var(--text3); font-family: 'DM Mono', monospace; font-size: 10px; padding: 4px 8px !important; text-align: right; min-width: 36px; }
-.cell-input { background: transparent; border: 1px solid transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; width: 100%; min-width: 80px; padding: 4px 5px; outline: none; border-radius: 4px; transition: all 0.1s; }
+.row-num { color: var(--text3); font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 10px; padding: 4px 8px !important; text-align: right; min-width: 36px; }
+.cell-input { background: transparent; border: 1px solid transparent; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; width: 100%; min-width: 80px; padding: 4px 5px; outline: none; border-radius: 4px; transition: all 0.1s; }
 .cell-input:focus { background: var(--surface2); border-color: var(--accent); }
 .cell-input.cell-error { border-color: var(--error) !important; }
-.cell-select { background: transparent; border: 1px solid transparent; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 12px; width: 100%; min-width: 120px; padding: 4px 22px 4px 5px; outline: none; cursor: pointer; -webkit-appearance: none; border-radius: 4px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; }
+.cell-select { background: transparent; border: 1px solid transparent; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; width: 100%; min-width: 120px; padding: 4px 22px 4px 5px; outline: none; cursor: pointer; -webkit-appearance: none; border-radius: 4px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; }
 .cell-select:focus { background-color: var(--surface2); border-color: var(--accent); }
 .cell-select.cell-error { border-color: var(--error) !important; }
 
@@ -947,15 +948,6 @@ async function initApp(token, instanceUrl, name) {
 }
 
 async function checkCallback() {
-  const params = new URLSearchParams(location.search);
-  const token  = params.get('token');
-  if (token) {
-    const instanceUrl = decodeURIComponent(params.get('instance_url') || SF_DOMAIN);
-    const name        = decodeURIComponent(params.get('user_name')    || '');
-    await initApp(token, instanceUrl, name);
-    history.replaceState({}, '', location.pathname);
-    return;
-  }
   const existing = getToken();
   if (existing) await initApp(existing, getBase(), sessionStorage.getItem('sf_user') || '');
 }
@@ -1122,7 +1114,7 @@ function searchUnlocode(query) {
         <div style="margin-top:8px; display:flex; align-items:center; gap:8px;">
           <input id="custom-locode-input" type="text" maxlength="3"
             placeholder="ABC"
-            style="width:64px; text-align:center; text-transform:uppercase; letter-spacing:0.12em; font-family:'DM Mono',monospace; font-size:14px; font-weight:500; background:var(--surface); border:1px solid var(--border2); border-radius:6px; color:var(--text); padding:6px 8px;"
+            style="width:64px; text-align:center; text-transform:uppercase; letter-spacing:0.12em; font-family:'SF Mono', 'Consolas', 'Monaco', monospace; font-size:14px; font-weight:500; background:var(--surface); border:1px solid var(--border2); border-radius:6px; color:var(--text); padding:6px 8px;"
             oninput="onCustomLocodeInput(this)"
             onkeydown="if(event.key==='Enter') confirmCustomLocode()">
           <button id="custom-locode-btn" onclick="confirmCustomLocode()"
@@ -1806,7 +1798,7 @@ function renderResults(results) {
     if (r.success) return `<div class="result-row">
       <span class="result-badge r-ok">✓ OK</span>
       <span style="font-weight:500;">${escHtml(name)}</span>
-      <span style="color:var(--text3);font-family:'DM Mono',monospace;font-size:10px;margin-left:auto;">${r.id}</span>
+      <span style="color:var(--text3);font-family:'SF Mono', 'Consolas', 'Monaco', monospace;font-size:10px;margin-left:auto;">${r.id}</span>
     </div>`;
     const msg = r.errors?.map(e => e.message).join('; ') || 'Unknown error';
     return `<div class="result-row r-fail">
