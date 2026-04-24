@@ -1044,6 +1044,8 @@ function onCountryChange(val) {
 
   document.getElementById('g-unicode').value = '';
   document.getElementById('unicode-city-search').value = '';
+  document.getElementById('g-program-search').value = '';
+  document.getElementById('g-program-id').value = '';
   closeLookup('unicode-city');
   loadUnlocodeForCountry(val);
   updateUsersByCountry(val);
@@ -1177,7 +1179,7 @@ document.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════════
 
 function fillDropdowns(programs, users, label) {
-  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '' }));
+  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '', country: r.Country__c || r.country || '' }));
   S.cachedUsers    = users.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, group: r.group || '' }));
   document.getElementById('cache-empty-warning').style.display = 'none';
   if (label) document.getElementById('cache-age').textContent = label;
@@ -1187,9 +1189,11 @@ function fillDropdowns(programs, users, label) {
 
 function filterPrograms(query) {
   const lower = query.toLowerCase().trim();
+  const country = document.getElementById('g-country').value;
+  const pool = country ? S.cachedPrograms.filter(p => p.country === country) : S.cachedPrograms;
   const results = lower
-    ? S.cachedPrograms.filter(p => p.name.toLowerCase().includes(lower)).slice(0, 15)
-    : S.cachedPrograms.slice(0, 10);
+    ? pool.filter(p => p.name.toLowerCase().includes(lower)).slice(0, 15)
+    : pool.slice(0, 10);
   const el = document.getElementById('g-program-results');
   if (!S.cachedPrograms.length) { el.classList.remove('open'); return; }
   el.innerHTML = results.map(p => {
@@ -1260,18 +1264,20 @@ async function loadLiveData() {
   try {
     const COUNTRY_GROUPS = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
     const [programs, users, groupMembers] = await Promise.all([
-      sfQuery('SELECT Id, Name, Unicode_Program__c FROM sitetracker__Program2__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
       sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS})`),
     ]);
     const userGroupMap = {};
     groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
     const taggedUsers = users.map(u => ({ ...u, group: userGroupMap[u.Id] || '' }));
+    const groupedCount = taggedUsers.filter(u => u.group).length;
+    console.log(`[QwelloImport] ${users.length} User, ${groupedCount} mit Ländergruppe, ${groupMembers.length} GroupMember-Einträge`);
     if (programs.length || taggedUsers.length) {
       fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
       return;
     }
-  } catch(e) { /* fall through to cache */ }
+  } catch(e) { console.error('[QwelloImport] loadLiveData Fehler:', e); /* fall through to cache */ }
   await loadCache();
 }
 
@@ -1316,7 +1322,7 @@ async function refreshCache() {
   try {
     const COUNTRY_GROUPS = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
     const [programs, users, groupMembers] = await Promise.all([
-      sfQuery('SELECT Id, Name, Unicode_Program__c FROM sitetracker__Program2__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
       sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS})`),
     ]);
