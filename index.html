@@ -174,7 +174,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 /* ── MAPPING TABLE ── */
 .mapping-wrap { overflow-x: auto; }
 .mapping-table { border-collapse: collapse; width: 100%; }
-.mapping-table th, .mapping-table td { padding: 8px 10px; text-align: left; border: 1px solid var(--border); }
+.mapping-table th, .mapping-table td { padding: 8px 10px; text-align: left; border: 1px solid var(--border); min-width: 180px; }
 .mapping-table thead th { background: var(--surface2); color: var(--text2); font-size: 11px; font-weight: 500; }
 .mapping-table tbody td { background: var(--surface); font-size: 12px; }
 .col-original { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); }
@@ -182,7 +182,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .mapping-select { width: 100%; min-width: 190px; font-size: 12px; padding: 6px 28px 6px 8px; }
 .cfs-wrap { margin-top: 6px; position: relative; }
 .cfs-input { width: 100%; font-size: 12px; padding: 5px 8px; }
-.cfs-results { position: absolute; top: calc(100% + 2px); left: 0; right: 0; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); z-index: 60; max-height: 160px; overflow-y: auto; display: none; }
+.cfs-results { position: fixed; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius); z-index: 9999; max-height: 200px; overflow-y: auto; display: none; min-width: 220px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); }
 .cfs-results.open { display: block; }
 .cfs-item { padding: 7px 10px; cursor: pointer; font-size: 12px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
 .cfs-item:hover { background: var(--surface); }
@@ -1536,9 +1536,9 @@ function renderMappingTable() {
   S.rawHeaders.forEach((_, i) => {
     const m = S.mapping[i];
     if (m.lockedByGlobal) {
-      html += `<td style="vertical-align:top;opacity:0.6;">
-        <div style="font-size:11px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text3);">
-          ← ${escHtml(globalLockLabel(m.api))}
+      html += `<td style="vertical-align:top;">
+        <div style="font-size:11px;padding:6px 8px;background:rgba(76,175,136,0.12);border:1px solid var(--success);border-radius:var(--radius);color:var(--success);">
+          ✓ ${escHtml(globalLockLabel(m.api))}
         </div>
       </td>`;
       return;
@@ -1612,6 +1612,11 @@ function searchCustomField(colIndex, query) {
         </div>`).join('')
       : '<div class="lookup-item-empty">No fields found</div>';
     results.classList.add('open');
+    const input = document.getElementById(`cfs-input-${colIndex}`);
+    const rect = input.getBoundingClientRect();
+    results.style.top  = (rect.bottom + 2) + 'px';
+    results.style.left = rect.left + 'px';
+    results.style.width = Math.max(rect.width, 260) + 'px';
   }, 200);
 }
 function selectCustomField(colIndex, api, label, sfType) {
