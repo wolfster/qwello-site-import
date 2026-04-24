@@ -1262,17 +1262,11 @@ function autoSelectLoggedInUser() {
 
 async function loadLiveData() {
   try {
-    const COUNTRY_GROUPS = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
-    const [programs, users, groupMembers] = await Promise.all([
+    const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS})`),
+      sfQuery('SELECT Id, Name, Country__c FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
     ]);
-    const userGroupMap = {};
-    groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
-    const taggedUsers = users.map(u => ({ ...u, group: userGroupMap[u.Id] || '' }));
-    const groupedCount = taggedUsers.filter(u => u.group).length;
-    console.log(`[QwelloImport] ${users.length} User, ${groupedCount} mit Ländergruppe, ${groupMembers.length} GroupMember-Einträge`);
+    const taggedUsers = users.map(u => ({ ...u, group: u.Country__c || '' }));
     if (programs.length || taggedUsers.length) {
       fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
       return;
@@ -1320,18 +1314,14 @@ async function refreshCache() {
   if (isDemo()) { showNotif('Im Demo Mode nicht verfügbar', 'warning'); return; }
   showLoading('Lade Daten aus Salesforce…');
   try {
-    const COUNTRY_GROUPS = Object.keys(COUNTRY_ISO).map(c => `'${c}'`).join(',');
-    const [programs, users, groupMembers] = await Promise.all([
+    const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery('SELECT Id, Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
-      sfQuery(`SELECT UserOrGroupId, Group.Name FROM GroupMember WHERE Group.Type = 'Regular' AND Group.Name IN (${COUNTRY_GROUPS})`),
+      sfQuery('SELECT Id, Name, Country__c FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
     ]);
-    const userGroupMap = {};
-    groupMembers.forEach(m => { userGroupMap[m.UserOrGroupId] = m.Group.Name; });
     const cache = {
       lastUpdated: new Date().toISOString().split('T')[0],
-      programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '' })),
-      users: users.map(u => ({ id: u.Id, name: u.Name, group: userGroupMap[u.Id] || '' })),
+      programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '', country: p.Country__c || '' })),
+      users: users.map(u => ({ id: u.Id, name: u.Name, group: u.Country__c || '' })),
     };
     const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -1339,7 +1329,7 @@ async function refreshCache() {
     a.download = 'cache.json';
     a.click();
     hideLoading();
-    const taggedUsers = users.map(u => ({ ...u, group: userGroupMap[u.Id] || '' }));
+    const taggedUsers = users.map(u => ({ ...u, group: u.Country__c || '' }));
     fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
     showNotif(`${programs.length} Programme, ${users.length} User geladen — cache.json heruntergeladen zum Pushen ins Repo`, 'success');
   } catch(e) {
