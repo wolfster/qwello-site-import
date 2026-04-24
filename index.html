@@ -378,6 +378,10 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 </div>
 
 <!-- ═══ APP ══════════════════════════════════════════════════════════ -->
+<div id="session-expired-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:#fff;padding:12px 20px;display:none;align-items:center;justify-content:center;gap:16px;font-size:14px;font-weight:500;">
+  <span>⚠ Session abgelaufen — bitte neu anmelden.</span>
+  <button onclick="window.location.href=SF_DOMAIN+'/apex/QwelloImport'" style="background:#fff;color:#c0392b;border:none;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;font-size:13px;">Neu anmelden →</button>
+</div>
 <div id="app-screen">
 
   <!-- Topbar -->
@@ -958,10 +962,16 @@ async function checkCallback() {
 // ════════════════════════════════════════════════════════════
 // SF API
 // ════════════════════════════════════════════════════════════
+function handleSessionExpired() {
+  const banner = document.getElementById('session-expired-banner');
+  if (banner) banner.style.display = 'flex';
+}
+
 async function sfGet(path) {
   const res = await fetch(`${getBase()}/services/data/${SF_API}${path}`, {
     headers: { Authorization: `Bearer ${getToken()}` }
   });
+  if (res.status === 401) { handleSessionExpired(); throw new Error('SF 401'); }
   if (!res.ok) throw new Error(`SF ${res.status}`);
   return res.json();
 }
