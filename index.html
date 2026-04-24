@@ -1211,7 +1211,7 @@ const ROLE_COUNTRY = {
 };
 
 function fillDropdowns(programs, users, label) {
-  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '', country: r.Country__c || r.country || '' }));
+  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '', country: r.Country__c || r.country || '', pm: r.Project_Manager__c || r.pm || '', sales: r.Sales_Manager__c || r.sales || '' }));
   S.cachedUsers    = users.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, group: r.group || '' }));
   document.getElementById('cache-empty-warning').style.display = 'none';
   if (label) document.getElementById('cache-age').textContent = label;
@@ -1231,7 +1231,9 @@ function filterPrograms(query) {
   el.innerHTML = results.map(p => {
     const safe = p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     const safeU = (p.unlocode || '').replace(/'/g,"\\'");
-    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}','${safeU}')">
+    const safePm = (p.pm || '').replace(/'/g,"\\'");
+    const safeSales = (p.sales || '').replace(/'/g,"\\'");
+    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}','${safeU}','${safePm}','${safeSales}')">
       <div class="lookup-item-name">${escHtml(p.name)}${p.unlocode ? `<span style="color:var(--text3);font-size:10px;margin-left:6px;">${escHtml(p.unlocode)}</span>` : ''}</div>
     </div>`;
   }).join('') +
@@ -1241,7 +1243,7 @@ function filterPrograms(query) {
   el.classList.add('open');
 }
 
-function selectProgram(id, name, unlocode) {
+function selectProgram(id, name, unlocode, pm, sales) {
   document.getElementById('g-program-search').value = name;
   document.getElementById('g-program-id').value = id;
   document.getElementById('g-program-results').classList.remove('open');
@@ -1251,6 +1253,14 @@ function selectProgram(id, name, unlocode) {
     document.getElementById('g-unicode').value = unlocode;
     document.getElementById('unicode-city-search').value = name;
     clearFieldError('gfield-unicode');
+  }
+  if (pm) {
+    const pmSel = document.getElementById('g-pm-select');
+    if ([...pmSel.options].some(o => o.value === pm)) { pmSel.value = pm; clearFieldError('gfield-pm'); }
+  }
+  if (sales) {
+    const salesSel = document.getElementById('g-sales-select');
+    if ([...salesSel.options].some(o => o.value === sales)) { salesSel.value = sales; clearFieldError('gfield-sales'); }
   }
 }
 
@@ -1298,7 +1308,7 @@ function autoSelectLoggedInUser() {
 async function loadLiveData() {
   try {
     const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c, Project_Manager__c, Sales_Manager__c FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery('SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
     ]);
     const taggedUsers = users.map(u => ({ ...u, group: ROLE_COUNTRY[u.UserRole?.Name] || '' }));
@@ -1350,13 +1360,13 @@ async function refreshCache() {
   showLoading('Lade Daten aus Salesforce…');
   try {
     const [programs, users] = await Promise.all([
-      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c FROM sitetracker__Program2__c ORDER BY Name'),
+      sfQuery('SELECT Id, Name, Unicode_Program__c, Country__c, Project_Manager__c, Sales_Manager__c FROM sitetracker__Program2__c ORDER BY Name'),
       sfQuery('SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true ORDER BY Name LIMIT 500'),
     ]);
     const taggedUsers = users.map(u => ({ ...u, group: ROLE_COUNTRY[u.UserRole?.Name] || '' }));
     const cache = {
       lastUpdated: new Date().toISOString().split('T')[0],
-      programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '', country: p.Country__c || '' })),
+      programs: programs.map(p => ({ id: p.Id, name: p.Name, unlocode: p.Unicode_Program__c || '', country: p.Country__c || '', pm: p.Project_Manager__c || '', sales: p.Sales_Manager__c || '' })),
       users: taggedUsers.map(u => ({ id: u.Id, name: u.Name, group: u.group })),
     };
     const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
