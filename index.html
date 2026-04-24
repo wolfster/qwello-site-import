@@ -1166,10 +1166,14 @@ document.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════════
 // CACHE: Programme & User aus cache.json laden
 // ════════════════════════════════════════════════════════════
+const COUNTRY_ISO = {
+  'Germany': 'DE', 'France': 'FR', 'Denmark': 'DK',
+  'Poland': 'PL', 'Spain': 'ES', 'Sweden': 'SE', 'UK': 'GB'
+};
+
 function fillDropdowns(programs, users, label) {
-  const norm = arr => arr.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, country: r.Country || r.country || '' }));
-  S.cachedPrograms = norm(programs);
-  S.cachedUsers    = norm(users);
+  S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name }));
+  S.cachedUsers    = users.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, role: r.UserRole?.Name || r.role || '' }));
   document.getElementById('cache-empty-warning').style.display = 'none';
   if (label) document.getElementById('cache-age').textContent = label;
   const country = document.getElementById('g-country').value;
@@ -1213,11 +1217,9 @@ function showManualProgram() {
 
 function updateUsersByCountry(country) {
   const all = S.cachedUsers;
-  const filtered = country
-    ? all.filter(u => u.country && (
-        u.country.toLowerCase().includes(country.toLowerCase()) ||
-        country.toLowerCase().includes(u.country.toLowerCase())
-      ))
+  const iso = country ? (COUNTRY_ISO[country] || '').toUpperCase() : '';
+  const filtered = iso
+    ? all.filter(u => u.role && u.role.toUpperCase().includes(iso))
     : all;
   const toShow = filtered.length ? filtered : all;
   ['g-sales-select','g-pm-select'].forEach(selId => {
@@ -1233,7 +1235,7 @@ async function loadLiveData() {
   try {
     const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery("SELECT Id, Name, Country FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
+      sfQuery("SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true AND UserRoleId != null ORDER BY Name LIMIT 500"),
     ]);
     if (programs.length || users.length) {
       fillDropdowns(programs, users, `Live ✓ ${programs.length} Programme`);
@@ -1284,12 +1286,12 @@ async function refreshCache() {
   try {
     const [programs, users] = await Promise.all([
       sfQuery('SELECT Id, Name FROM sitetracker__Program2__c ORDER BY Name'),
-      sfQuery("SELECT Id, Name, Country FROM User WHERE IsActive = true ORDER BY Name LIMIT 500"),
+      sfQuery("SELECT Id, Name, UserRole.Name FROM User WHERE IsActive = true AND UserRoleId != null ORDER BY Name LIMIT 500"),
     ]);
     const cache = {
       lastUpdated: new Date().toISOString().split('T')[0],
       programs: programs.map(p => ({ id: p.Id, name: p.Name })),
-      users: users.map(u => ({ id: u.Id, name: u.Name })),
+      users: users.map(u => ({ id: u.Id, name: u.Name, role: u.UserRole?.Name || '' })),
     };
     const blob = new Blob([JSON.stringify(cache, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
