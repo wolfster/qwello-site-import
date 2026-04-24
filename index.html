@@ -1175,10 +1175,6 @@ document.addEventListener('click', e => {
 // ════════════════════════════════════════════════════════════
 // CACHE: Programme & User aus cache.json laden
 // ════════════════════════════════════════════════════════════
-const COUNTRY_ISO = {
-  'Germany': 'DE', 'France': 'FR', 'Denmark': 'DK',
-  'Poland': 'PL', 'Spain': 'ES', 'Sweden': 'SE', 'UK': 'GB'
-};
 
 function fillDropdowns(programs, users, label) {
   S.cachedPrograms = programs.map(r => ({ id: r.Id || r.id, name: r.Name || r.name, unlocode: r.Unicode_Program__c || r.unlocode || '' }));
