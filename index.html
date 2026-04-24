@@ -745,6 +745,7 @@ const FIELDS = [
   { api:'Rejection_Reason__c',               label:'Rejection Reason',            type:'picklist'                 },
   { api:'Rejection_Date__c',                 label:'Rejection Date',              type:'date'                     },
   { api:'Rejection_Reason_Description__c',   label:'Rejection Description',       type:'text'                     },
+  { api:'Link_to_Google_Drive__c',           label:'Link to Google Drive',        type:'text'                     },
 ];
 
 const GLOBAL_APIS = new Set(['Country__c','Unicode_ID__c','Program__c','Sales_Manager__c','Project_Manager__c']);
@@ -1472,20 +1473,41 @@ function clearPasteState() {
 function buildAutoMapping() {
   S.mapping = S.rawHeaders.map((header, colIndex) => {
     const match = autoMatchField(header);
-    return { colIndex, ...(match || { api:'__skip__', label:'Skip', type:'skip', skip:true }) };
+    if (!match) return { colIndex, api:'__skip__', label:'Skip', type:'skip', skip:true, unrecognized:true };
+    if (GLOBAL_APIS.has(match.api)) return { colIndex, ...match, lockedByGlobal: true };
+    return { colIndex, ...match };
   });
 }
+const FIELD_ALIASES = {
+  'salesmanager':   'Sales_Manager__c',
+  'salesmanagerc':  'Sales_Manager__c',
+  'projectmanager': 'Project_Manager__c',
+  'projectmanagerc':'Project_Manager__c',
+  'program':        'Program__c',
+  'programc':       'Program__c',
+};
 function autoMatchField(header) {
   const h = header.toLowerCase().replace(/[^a-z0-9]/g,'');
-  // 1. Exact API name match (highest priority)
+  // 0. Alias map (human-readable + global field variants)
+  if (FIELD_ALIASES[h]) {
+    const api = FIELD_ALIASES[h];
+    const known = FIELDS.find(f => f.api === api);
+    if (known) return known;
+    return { api, label: header, type: 'text', lockedByGlobal: GLOBAL_APIS.has(api) };
+  }
+  // 1. Exact API name match in static FIELDS
   for (const f of FIELDS) {
     if (h === f.api.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
   }
-  // 2. Exact label match
+  // 2. Exact label match in static FIELDS
   for (const f of FIELDS) {
     if (h === f.label.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
   }
-  // 3. Fuzzy: label starts with header (only for short headers, avoids false positives)
+  // 3. Exact API name match in dynamic S.allFields
+  for (const f of S.allFields) {
+    if (h === f.api.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
+  }
+  // 4. Fuzzy: label starts with header (short headers only)
   if (h.length >= 3 && h.length <= 10) {
     for (const f of FIELDS) {
       const label = f.label.toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -1494,17 +1516,36 @@ function autoMatchField(header) {
   }
   return null;
 }
+function globalLockLabel(api) {
+  if (api === 'Program__c')        return getProgramName() || 'Program (Global)';
+  if (api === 'Sales_Manager__c')  return getSelectName('g-sales-select') || 'Sales Manager (Global)';
+  if (api === 'Project_Manager__c')return getSelectName('g-pm-select')    || 'Project Manager (Global)';
+  return 'Global Setting';
+}
 function renderMappingTable() {
   const previews = S.rawRows.slice(0,3);
-  let html = '<thead><tr><th style="width:30px;">#</th>';
+  const lockedCount = S.mapping.filter(m => m.lockedByGlobal).length;
+  let html = '';
+  if (lockedCount) html += `<thead><tr><td colspan="999" style="background:var(--surface2);padding:6px 12px;font-size:11px;color:var(--text3);border:1px solid var(--border);">` +
+    `${lockedCount} Spalte${lockedCount>1?'n':''} aus Global Settings übernommen und gesperrt.</td></tr></thead>`;
+  html += '<thead><tr><th style="width:30px;">#</th>';
   S.rawHeaders.forEach(h => { html += `<th><div class="col-original">${escHtml(h)}</div></th>`; });
   html += '</tr></thead><tbody>';
   // Mapping selects row
   html += '<tr style="background:var(--bg);"><td style="font-size:10px;color:var(--text3);padding:8px;text-align:right;">Field</td>';
   S.rawHeaders.forEach((_, i) => {
     const m = S.mapping[i];
+    if (m.lockedByGlobal) {
+      html += `<td style="vertical-align:top;opacity:0.6;">
+        <div style="font-size:11px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text3);">
+          ← ${escHtml(globalLockLabel(m.api))}
+        </div>
+      </td>`;
+      return;
+    }
+    const unrecognized = m.unrecognized;
     html += `<td style="vertical-align:top;">
-      ${buildMappingSelect(i, m)}
+      ${buildMappingSelect(i, m, unrecognized)}
       <div class="cfs-wrap" id="cfs-wrap-${i}" style="display:none;">
         <input class="cfs-input" id="cfs-input-${i}" placeholder="Search field…" oninput="searchCustomField(${i},this.value)" autocomplete="off">
         <div class="cfs-results" id="cfs-results-${i}"></div>
@@ -1522,8 +1563,9 @@ function renderMappingTable() {
   html += '</tbody>';
   document.getElementById('mapping-table').innerHTML = html;
 }
-function buildMappingSelect(colIndex, current) {
-  let html = `<select class="mapping-select" onchange="onMappingChange(${colIndex},this.value)">`;
+function buildMappingSelect(colIndex, current, unrecognized) {
+  const style = unrecognized ? ' style="border-color:var(--warning);color:var(--warning);"' : '';
+  let html = `<select class="mapping-select"${style} onchange="onMappingChange(${colIndex},this.value)">`;
   html += `<option value="__skip__"${(!current||current.skip)?' selected':''}>⊘ Skip</option>`;
   html += `<option value="__custom__">🔍 Search field…</option>`;
   html += `<option disabled>──────────</option>`;
