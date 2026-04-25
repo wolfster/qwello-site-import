@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com https://ipapi.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
 <title>Qwello Site Import</title>
 <style>
 
@@ -936,7 +936,7 @@ async function initApp(token, instanceUrl, name) {
   if (cached) S.allFields = JSON.parse(cached);
   await Promise.all([loadCountries(), loadLiveData()]);
   if (!isDemo()) {
-    const detected = await detectCountryByIP();
+    const detected = detectCountryByTimezone();
     if (detected && !document.getElementById('g-country').value) {
       document.getElementById('g-country').value = detected;
       onCountryChange(detected);
@@ -1284,12 +1284,21 @@ function updateUsersByCountry(country) {
   });
 }
 
-async function detectCountryByIP() {
-  try {
-    const d = await fetch('https://ipapi.co/json/').then(r => r.json());
-    const name = d.country_name;
-    return COUNTRY_ISO[name] ? name : null;
-  } catch(e) { return null; }
+function detectCountryByTimezone() {
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const map = {
+    'Europe/Berlin':     'Germany',
+    'Europe/Busingen':   'Germany',
+    'Europe/Paris':      'France',
+    'Europe/Madrid':     'Spain',
+    'Atlantic/Canary':   'Spain',
+    'Europe/London':     'UK',
+    'Europe/Warsaw':     'Poland',
+    'Europe/Stockholm':  'Sweden',
+    'Europe/Copenhagen': 'Denmark',
+  };
+  const name = map[tz] || null;
+  return name && COUNTRY_ISO[name] ? name : null;
 }
 
 function autoSelectLoggedInUser() {
