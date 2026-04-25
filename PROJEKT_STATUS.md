@@ -77,7 +77,7 @@ Durchgeführt nach einem internen Security-Audit (zwei unabhängige Experten-Rev
 | H1 | Salesforce CORS-Whitelist prüfen: nur `wolfster.github.io` erlaubt? | Salesforce Admin erforderlich |
 | H1 | Redirect-URI in Connected App auf bekannte Callback-URL beschränken | Salesforce Admin erforderlich |
 | M3 | Demo-Daten anonymisieren (Städtenamen entfernen) | Niedrige Priorität |
-| L4 | SRI-Integritätsprüfung für UNLOCODE-Dateien | Komplex, niedriges Risiko |
+| ~~L4~~ | ~~SRI-Integritätsprüfung für UNLOCODE-Dateien~~ | Nicht relevant — Daten sind öffentlich (UNECE), kein Schutzbedarf. Code kommt im Normalfall aus SiteTracker. |
 
 ### Akzeptierte Risiken (nicht behebbar ohne Backend)
 
