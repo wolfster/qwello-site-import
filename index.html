@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com https://ipapi.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com https://ipapi.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
 <title>Qwello Site Import</title>
 <style>
 
@@ -684,6 +684,8 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 </div>
 
 <script>
+if (window.self !== window.top) { try { window.top.location = window.self.location; } catch(e) { document.body.innerHTML = ''; } }
+
 // ════════════════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════════════════
@@ -889,6 +891,8 @@ async function pollDeviceCode(deviceCode, interval) {
       if (data.access_token) {
         let userName = '';
         try {
+          const idUrl = new URL(data.id);
+          if (!idUrl.hostname.endsWith('.salesforce.com')) throw new Error('Invalid user info URL');
           const uRes = await fetch(data.id, { headers: { Authorization: `Bearer ${data.access_token}` } });
           const uData = await uRes.json();
           userName = uData.display_name || uData.name || '';
@@ -951,6 +955,7 @@ async function checkCallback() {
 // SF API
 // ════════════════════════════════════════════════════════════
 function handleSessionExpired() {
+  sessionStorage.clear();
   const banner = document.getElementById('session-expired-banner');
   if (banner) banner.style.display = 'flex';
 }
@@ -1124,9 +1129,9 @@ function searchUnlocode(query) {
     results.classList.add('open'); return;
   }
   results.innerHTML = matches.map(([code, name]) =>
-    `<div class="lookup-item" onclick="selectUnlocode('${code}','${name.replace(/'/g,"\\'")}')">
-      <div class="lookup-item-name">${name}</div>
-      <div class="lookup-item-sub">${iso}${code}</div>
+    `<div class="lookup-item" data-code="${escHtml(code)}" data-name="${escHtml(name)}">
+      <div class="lookup-item-name">${escHtml(name)}</div>
+      <div class="lookup-item-sub">${escHtml(iso)}${escHtml(code)}</div>
     </div>`).join('');
   results.classList.add('open');
 }
@@ -1773,7 +1778,7 @@ function buildCsv(rows) {
     Project_Manager__c: document.getElementById('g-pm-select').value,
   };
   const keys = [...new Set([...Object.keys(globals), ...rows.flatMap(r => Object.keys(r.cells))])];
-  const esc = v => { const s = String(v||'').replace(/"/g,'""'); return s.includes(',')||s.includes('"')||s.includes('\n') ? `"${s}"` : s; };
+  const esc = v => { let s = String(v||'').replace(/"/g,'""'); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return s.includes(',')||s.includes('"')||s.includes('\n') ? `"${s}"` : s; };
   return keys.join(',') + '\n' + rows.map(row => keys.map(k => esc({...globals,...row.cells}[k]||'')).join(',')).join('\n');
 }
 function triggerDownload(content, filename) {
@@ -1820,6 +1825,11 @@ function escHtml(s) {
 // ════════════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════════════
+document.getElementById('unicode-city-results').addEventListener('click', e => {
+  const item = e.target.closest('.lookup-item[data-code]');
+  if (item) selectUnlocode(item.dataset.code, item.dataset.name);
+});
+
 checkCallback();
 </script>
 </body>
