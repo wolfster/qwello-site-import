@@ -52,6 +52,41 @@ Reines HTML/CSS/JS — kein Backend, kein Build-Step, gehostet auf GitHub Pages.
 
 ---
 
+## Security Hardening (April 2025)
+
+Durchgeführt nach einem internen Security-Audit (zwei unabhängige Experten-Reviews).
+
+### Implementierte Fixes
+
+| # | Was | Datei |
+|---|-----|-------|
+| K1 | OAuth CSRF: State-Parameter Validierung in Callback (forward-compatible) | `callback.html` |
+| K2 | Token-Leak-Schutz: `data.id`-URL wird gegen `*.salesforce.com` validiert | `callback.html`, `index.html` |
+| K3 | XSS-Fix: UNLOCODE-Autocomplete nutzt jetzt `data-code`/`data-name`-Attribute statt unsicherer `onclick`-Strings; alle Namen via `escHtml()` escaped | `index.html` |
+| H3 | `sessionStorage.clear()` wird sofort bei 401-Fehler aufgerufen (nicht erst beim Logout) | `index.html` |
+| M1 | `ipapi.co` (Drittanbieter-IP-Geolokation) ersetzt durch browser-native Timezone-Erkennung (`Intl.DateTimeFormat`) — kein externer Call mehr | `index.html` |
+| M2 | Persönliche E-Mail-Adresse aus öffentlicher Dokumentation entfernt | `DEVELOPER_PROMPT.md` |
+| M4 | CSV Formula Injection Schutz: Felder die mit `=`, `+`, `-`, `@` beginnen werden mit `'` präfixiert | `index.html` |
+| L1 | Clickjacking-Schutz: JS frame-buster + `frame-ancestors 'none'` in CSP | `index.html` |
+| L3 | Referrer Policy: `no-referrer` → `strict-origin-when-cross-origin` | `index.html` |
+
+### Noch offen (extern / bewusst zurückgestellt)
+
+| # | Was | Warum offen |
+|---|-----|-------------|
+| H1 | Salesforce CORS-Whitelist prüfen: nur `wolfster.github.io` erlaubt? | Salesforce Admin erforderlich |
+| H1 | Redirect-URI in Connected App auf bekannte Callback-URL beschränken | Salesforce Admin erforderlich |
+| M3 | Demo-Daten anonymisieren (Städtenamen entfernen) | Niedrige Priorität |
+| L4 | SRI-Integritätsprüfung für UNLOCODE-Dateien | Komplex, niedriges Risiko |
+
+### Akzeptierte Risiken (nicht behebbar ohne Backend)
+
+- `unsafe-inline` in CSP — unvermeidbar bei Single-File-Architektur
+- Session-Token in `sessionStorage` — Best-Practice für GitHub Pages ohne Backend
+- CLIENT_ID im öffentlichen Repo — akzeptables Risiko bei PKCE ohne Client Secret
+
+---
+
 ## Bekannte Probleme / Blocker
 
 ### 🔴 KRITISCH: Salesforce OAuth funktioniert nicht
