@@ -180,6 +180,9 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .mapping-table tbody td { background: var(--surface); font-size: 12px; }
 .col-original { font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 11px; color: var(--accent); }
 .col-preview { color: var(--text3); font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.global-cell { font-size: 11px; padding: 7px 8px; background: rgba(76,175,136,0.12); border: 1px solid var(--success); border-radius: var(--radius); color: var(--success); line-height: 1.35; }
+.global-cell-label { font-weight: 600; }
+.global-cell-value { color: var(--text2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mapping-select { width: 100%; min-width: 190px; font-size: 12px; padding: 6px 28px 6px 8px; }
 .cfs-wrap { margin-top: 6px; position: relative; }
 .cfs-input { width: 100%; font-size: 12px; padding: 5px 8px; }
@@ -580,7 +583,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
     <div class="screen" id="screen-3">
       <div class="page-header">
         <h2>Map Columns</h2>
-        <p>Assign each column to the matching SiteTracker field. Set unused columns to "Skip".</p>
+        <p>Assign each pasted column to the matching SiteTracker field. Fields already filled in Global Settings are shown as applied there and are not imported from pasted columns.</p>
       </div>
 
       <div class="card">
@@ -745,7 +748,15 @@ const FIELDS = [
   { api:'Link_to_Google_Drive__c',           label:'Link to Google Drive',        type:'text'                     },
 ];
 
+const GLOBAL_FIELDS = [
+  { api:'Country__c',         label:'Country',         type:'text' },
+  { api:'Unicode_ID__c',      label:'Unicode ID',      type:'text' },
+  { api:'Program__c',         label:'Program',         type:'text' },
+  { api:'Sales_Manager__c',   label:'Sales Manager',   type:'text' },
+  { api:'Project_Manager__c', label:'Project Manager', type:'text' },
+];
 const GLOBAL_APIS = new Set(['Country__c','Unicode_ID__c','Program__c','Sales_Manager__c','Project_Manager__c']);
+const MAPPING_PREVIEW_ROW_LIMIT = 8;
 
 // ════════════════════════════════════════════════════════════
 // DEMO MODE
@@ -1422,6 +1433,13 @@ function buildAutoMapping() {
   });
 }
 const FIELD_ALIASES = {
+  'country':        'Country__c',
+  'countryc':       'Country__c',
+  'unicode':        'Unicode_ID__c',
+  'unicodeid':      'Unicode_ID__c',
+  'unicodeidc':     'Unicode_ID__c',
+  'locode':         'Unicode_ID__c',
+  'unlocode':       'Unicode_ID__c',
   'salesmanager':   'Sales_Manager__c',
   'salesmanagerc':  'Sales_Manager__c',
   'projectmanager': 'Project_Manager__c',
@@ -1434,7 +1452,7 @@ function autoMatchField(header) {
   // 0. Alias map (human-readable + global field variants)
   if (FIELD_ALIASES[h]) {
     const api = FIELD_ALIASES[h];
-    const known = FIELDS.find(f => f.api === api);
+    const known = [...FIELDS, ...GLOBAL_FIELDS].find(f => f.api === api);
     if (known) return known;
     return { api, label: header, type: 'text', lockedByGlobal: GLOBAL_APIS.has(api) };
   }
@@ -1459,18 +1477,23 @@ function autoMatchField(header) {
   }
   return null;
 }
-function globalLockLabel(api) {
-  if (api === 'Program__c')        return getProgramName() || 'Program (Global)';
-  if (api === 'Sales_Manager__c')  return getSelectName('g-sales-select') || 'Sales Manager (Global)';
-  if (api === 'Project_Manager__c')return getSelectName('g-pm-select')    || 'Project Manager (Global)';
+function globalFieldName(api) {
+  return GLOBAL_FIELDS.find(f => f.api === api)?.label || 'Global Setting';
+}
+function globalFieldValue(api) {
+  if (api === 'Country__c')        return document.getElementById('g-country').value;
+  if (api === 'Unicode_ID__c')     return document.getElementById('g-unicode').value;
+  if (api === 'Program__c')        return getProgramName();
+  if (api === 'Sales_Manager__c')  return getSelectName('g-sales-select');
+  if (api === 'Project_Manager__c')return getSelectName('g-pm-select');
   return 'Global Setting';
 }
 function renderMappingTable() {
-  const previews = S.rawRows.slice(0,3);
+  const previews = S.rawRows.slice(0,MAPPING_PREVIEW_ROW_LIMIT);
   const lockedCount = S.mapping.filter(m => m.lockedByGlobal).length;
   let html = '';
   if (lockedCount) html += `<thead><tr><td colspan="999" style="background:var(--surface2);padding:6px 12px;font-size:11px;color:var(--text3);border:1px solid var(--border);">` +
-    `${lockedCount} Spalte${lockedCount>1?'n':''} aus Global Settings übernommen und gesperrt.</td></tr></thead>`;
+    `${lockedCount} Spalte${lockedCount>1?'n':''} wird aus Global Settings geschrieben; die gepasteten Werte darunter dienen nur zur Kontrolle.</td></tr></thead>`;
   html += '<thead><tr><th style="width:30px;">#</th>';
   S.rawHeaders.forEach(h => { html += `<th><div class="col-original">${escHtml(h)}</div></th>`; });
   html += '</tr></thead><tbody>';
@@ -1480,8 +1503,9 @@ function renderMappingTable() {
     const m = S.mapping[i];
     if (m.lockedByGlobal) {
       html += `<td style="vertical-align:top;">
-        <div style="font-size:11px;padding:6px 8px;background:rgba(76,175,136,0.12);border:1px solid var(--success);border-radius:var(--radius);color:var(--success);">
-          ✓ ${escHtml(globalLockLabel(m.api))}
+        <div class="global-cell">
+          <div class="global-cell-label">✓ ${escHtml(globalFieldName(m.api))} from Global Settings</div>
+          <div class="global-cell-value">${escHtml(globalFieldValue(m.api) || 'Not set')}</div>
         </div>
       </td>`;
       return;
@@ -1565,6 +1589,11 @@ function searchCustomField(colIndex, query) {
 function selectCustomField(colIndex, api, label, sfType) {
   document.getElementById(`cfs-results-${colIndex}`).classList.remove('open');
   document.getElementById(`cfs-input-${colIndex}`).value = label;
+  if (GLOBAL_APIS.has(api)) {
+    S.mapping[colIndex] = { colIndex, api, label: globalFieldName(api), type:'text', lockedByGlobal:true };
+    renderMappingTable();
+    return;
+  }
   const isRef = sfType === 'reference';
   const type  = mapSfType(sfType);
   S.mapping[colIndex] = { colIndex, api, label, type, custom:true, isRef };
@@ -1575,8 +1604,8 @@ function mapSfType(sfType) {
 }
 
 function applyMappingAndNext() {
-  const active = S.mapping.filter(m => m.api && m.api !== '__skip__');
-  if (!active.length) { showNotif('Map at least one column', 'error'); return; }
+  const active = S.mapping.filter(m => m.api && m.api !== '__skip__' && !m.lockedByGlobal);
+  if (!active.length) { showNotif('Map at least one site column', 'error'); return; }
   buildPreviewRows();
   renderGlobalsSummary();
   renderPreviewTable();
@@ -1590,7 +1619,7 @@ function buildPreviewRows() {
   S.rows = S.rawRows.map((rawRow, rowIndex) => {
     const cells = {};
     S.mapping.forEach(m => {
-      if (!m.api || m.api === '__skip__') return;
+      if (!m.api || m.api === '__skip__' || m.lockedByGlobal) return;
       cells[m.api] = rawRow[m.colIndex] !== undefined ? rawRow[m.colIndex] : '';
     });
     return { rowIndex, cells, errors: validateRow(cells) };
@@ -1598,7 +1627,7 @@ function buildPreviewRows() {
 }
 function validateRow(cells) {
   const errors = [];
-  const mappedApis = new Set(S.mapping.filter(m => m.api && m.api !== '__skip__').map(m => m.api));
+  const mappedApis = new Set(S.mapping.filter(m => m.api && m.api !== '__skip__' && !m.lockedByGlobal).map(m => m.api));
   FIELDS.filter(f => f.required && mappedApis.has(f.api)).forEach(f => {
     if (!cells[f.api] || !String(cells[f.api]).trim()) errors.push({ api:f.api, msg:`${f.label} is required` });
   });
@@ -1632,7 +1661,7 @@ function renderGlobalsSummary() {
 }
 
 function renderPreviewTable() {
-  const mapped = S.mapping.filter(m => m.api && m.api !== '__skip__');
+  const mapped = S.mapping.filter(m => m.api && m.api !== '__skip__' && !m.lockedByGlobal);
   if (!mapped.length) return;
   const errorRows = S.rows.filter(r => r.errors.length);
   const banner = document.getElementById('validation-banner');
