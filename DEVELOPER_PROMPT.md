@@ -199,7 +199,7 @@ Das Tool enthält eine ein-/ausklappbare Anleitung mit diesen Schritten:
 3. Object: `sitetracker__Site__c`, Action: `Insert`
 4. CSV hochladen
 5. Import ausführen
-6. Bei Fehler: Screenshot an `wgu@qwello.de`
+6. Bei Fehler: Screenshot an das Qwello-Support-Postfach
 
 ---
 

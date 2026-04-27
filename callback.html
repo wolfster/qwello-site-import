@@ -56,6 +56,18 @@ async function run() {
     return;
   }
 
+  // CSRF state validation (forward-compatible: only checked if state was stored before redirect)
+  const storedState = sessionStorage.getItem('oauth_state');
+  if (storedState) {
+    const returnedState = params.get('state');
+    sessionStorage.removeItem('oauth_state');
+    if (returnedState !== storedState) {
+      document.getElementById('msg').className = 'err';
+      document.getElementById('msg').textContent = 'Sicherheitsfehler: State-Parameter ungültig. Bitte Seite neu laden.';
+      return;
+    }
+  }
+
   const verifier = sessionStorage.getItem('pkce_verifier');
 
   try {
@@ -79,8 +91,10 @@ async function run() {
       sessionStorage.setItem('sf_token', data.access_token);
       sessionStorage.setItem('sf_instance', data.instance_url || SF_DOMAIN);
 
-      // Get user info
+      // Get user info (validate data.id is a Salesforce URL to prevent token leakage)
       try {
+        const idUrl = new URL(data.id);
+        if (!idUrl.hostname.endsWith('.salesforce.com')) throw new Error('Invalid user info URL');
         const uRes = await fetch(data.id, {
           headers: { 'Authorization': `Bearer ${data.access_token}` }
         });
