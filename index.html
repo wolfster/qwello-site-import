@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com https://ipapi.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self';">
 <title>Qwello Site Import</title>
 <script>
 // Strip token from URL hash immediately — before any rendering or history sync
@@ -489,7 +489,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
               <input type="text" id="g-unicode" placeholder="e.g. MUC" maxlength="5" oninput="onUnicodeManualInput()">
               <a class="unicode-link" id="unicode-link" href="#" target="_blank" style="display:none;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
-                Open UNECE list for this country
+                Open UNICODE list for this country
               </a>
               <span class="error-msg">Required</span>
             </div>
@@ -905,7 +905,7 @@ async function initApp(token, instanceUrl, name) {
   if (cached) S.allFields = JSON.parse(cached);
   await Promise.all([loadCountries(), loadLiveData()]);
   if (!isDemo()) {
-    const detected = await detectCountryByIP();
+    const detected = detectCountryByBrowser();
     if (detected && !document.getElementById('g-country').value) {
       document.getElementById('g-country').value = detected;
       onCountryChange(detected);
@@ -1274,12 +1274,11 @@ function updateUsersByCountry(country) {
   });
 }
 
-async function detectCountryByIP() {
-  try {
-    const d = await fetch('https://ipapi.co/json/').then(r => r.json());
-    const name = d.country_name;
-    return COUNTRY_ISO[name] ? name : null;
-  } catch(e) { return null; }
+function detectCountryByBrowser() {
+  const lang = (navigator.language || (navigator.languages && navigator.languages[0]) || '');
+  const region = lang.includes('-') ? lang.split('-').pop().toUpperCase() : lang.toUpperCase();
+  const isoToCountry = Object.fromEntries(Object.entries(COUNTRY_ISO).map(([k, v]) => [v, k]));
+  return isoToCountry[region] || null;
 }
 
 function autoSelectLoggedInUser() {
