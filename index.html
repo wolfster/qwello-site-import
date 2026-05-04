@@ -1486,6 +1486,7 @@ const FIELD_ALIASES = {
 };
 function autoMatchField(header) {
   const h = header.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const hRaw = header.toLowerCase();
   // 0. Alias map (human-readable + global field variants)
   if (FIELD_ALIASES[h]) {
     const api = FIELD_ALIASES[h];
@@ -1501,7 +1502,11 @@ function autoMatchField(header) {
   for (const f of FIELDS) {
     if (h === f.label.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
   }
-  // 3. Exact API name match in dynamic S.allFields
+  // 3a. Literal case-insensitive API match in S.allFields (catches re-imported CSVs with exact API names)
+  for (const f of S.allFields) {
+    if (hRaw === f.api.toLowerCase()) return f;
+  }
+  // 3b. Normalized API name match in dynamic S.allFields
   for (const f of S.allFields) {
     if (h === f.api.toLowerCase().replace(/[^a-z0-9]/g,'')) return f;
   }
@@ -1559,9 +1564,16 @@ function renderMappingTable() {
   });
   html += '</tr>';
   // Preview rows
+  // Pre-compute which columns are entirely empty
+  const emptyCol = S.rawHeaders.map((_, ci) => S.rawRows.every(r => !r[ci]?.trim()));
   previews.forEach((row, ri) => {
     html += `<tr><td class="row-num" style="padding:6px 8px;">${ri+1}</td>`;
-    S.rawHeaders.forEach((_, ci) => { html += `<td class="col-preview">${escHtml(row[ci]||'')}</td>`; });
+    S.rawHeaders.forEach((_, ci) => {
+      const v = row[ci] || '';
+      html += emptyCol[ci] && ri === 0
+        ? `<td class="col-preview" style="color:var(--text3);font-style:italic;">— empty —</td>`
+        : `<td class="col-preview">${escHtml(v)}</td>`;
+    });
     html += '</tr>';
   });
   html += '</tbody>';
@@ -1628,7 +1640,7 @@ function searchCustomField(colIndex, query) {
 }
 function selectCustomField(colIndex, api, label, sfType) {
   document.getElementById(`cfs-results-${colIndex}`).classList.remove('open');
-  document.getElementById(`cfs-input-${colIndex}`).value = label;
+  document.getElementById(`cfs-wrap-${colIndex}`).style.display = 'none';
   if (GLOBAL_APIS.has(api)) {
     S.mapping[colIndex] = { colIndex, api, label: globalFieldName(api), type:'text', lockedByGlobal:true };
     renderMappingTable();
@@ -1637,6 +1649,15 @@ function selectCustomField(colIndex, api, label, sfType) {
   const isRef = sfType === 'reference';
   const type  = mapSfType(sfType);
   S.mapping[colIndex] = { colIndex, api, label, type, custom:true, isRef };
+  // Update the select to show the chosen field
+  const sel = document.querySelector(`#mapping-table select[onchange*="onMappingChange(${colIndex},"]`);
+  if (sel) {
+    let opt = sel.querySelector(`option[value="${api}"]`);
+    if (!opt) { opt = new Option(label, api); sel.add(opt); }
+    sel.value = api;
+    sel.style.borderColor = '';
+    sel.style.color = '';
+  }
   document.getElementById(`ref-warn-${colIndex}`).style.display = isRef ? 'block' : 'none';
 }
 function mapSfType(sfType) {
