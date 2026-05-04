@@ -225,6 +225,11 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .cell-select:focus { background-color: var(--surface2); border-color: var(--accent); }
 .cell-select.cell-error { border-color: var(--error) !important; }
 
+/* ── FILL DOWN ── */
+.fill-btn { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 5px; background: var(--surface); border: 1px solid var(--border2); border-radius: 4px; color: var(--text3); font-size: 9px; font-weight: 600; cursor: pointer; vertical-align: middle; transition: all 0.12s; white-space: nowrap; }
+.fill-btn:hover { background: var(--accent); border-color: var(--accent); color: #000; }
+.fill-btn.did-fill { background: rgba(76,175,136,0.15); border-color: var(--success); color: var(--success); }
+
 /* ── CONFIRM MODAL ── */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 400; display: none; align-items: center; justify-content: center; padding: 2rem; }
 .modal-backdrop.open { display: flex; }
@@ -1658,7 +1663,7 @@ function renderPreviewTable() {
   let html = '<table class="preview-table"><thead><tr><th style="width:36px;">#</th>';
   mapped.forEach(m => {
     const isReq = FIELDS.find(f => f.api === m.api)?.required;
-    html += `<th class="${isReq?'req-col':''}">${escHtml(m.label)}</th>`;
+    html += `<th class="${isReq?'req-col':''}">${escHtml(m.label)}<button class="fill-btn" id="fillbtn-${m.api}" onclick="fillDown('${m.api}')" title="Fill all rows with value from row 1">↓ Fill all</button></th>`;
   });
   html += '</tr></thead><tbody>';
 
@@ -1693,6 +1698,30 @@ function updateCell(rowIndex, api, value) {
   // Update cell border
   const input = tr?.querySelector(`[oninput*="'${api}'"], [onchange*="'${api}'"]`);
   if (input) input.classList.toggle('cell-error', S.rows[rowIndex].errors.some(e => e.api === api));
+}
+
+function fillDown(api) {
+  if (!S.rows.length) return;
+  const val = S.rows[0].cells[api] ?? '';
+  const tbody = document.querySelector('#preview-wrap tbody');
+  S.rows.forEach((row, ri) => {
+    row.cells[api] = val;
+    row.errors = validateRow(row.cells);
+    const tr = tbody?.querySelector(`tr:nth-child(${ri + 1})`);
+    if (!tr) return;
+    tr.className = row.errors.length ? 'row-error' : '';
+    const el = tr.querySelector(`[oninput*="'${api}'"], [onchange*="'${api}'"]`);
+    if (el) {
+      el.value = val;
+      el.classList.toggle('cell-error', row.errors.some(e => e.api === api));
+    }
+  });
+  const btn = document.getElementById(`fillbtn-${api}`);
+  if (btn) {
+    btn.classList.add('did-fill');
+    btn.textContent = '✓ Filled';
+    setTimeout(() => { btn.classList.remove('did-fill'); btn.textContent = '↓ Fill all'; }, 2000);
+  }
 }
 
 // ════════════════════════════════════════════════════════════
