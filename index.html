@@ -6,6 +6,18 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src https://sitetracker-qwello.my.salesforce.com https://ipapi.co; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self';">
 <title>Qwello Site Import</title>
+<script>
+// Strip token from URL hash immediately — before any rendering or history sync
+if (location.hash.includes('token=')) {
+  const _h = new URLSearchParams(location.hash.slice(1));
+  const _t = _h.get('token');
+  if (_t) {
+    sessionStorage.setItem('__sf_token_pending', _t);
+    sessionStorage.setItem('__sf_user_pending', _h.get('user_name') || '');
+    history.replaceState(null, '', location.pathname);
+  }
+}
+</script>
 <style>
 
 :root {
@@ -279,11 +291,11 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
     <!-- Token login -->
     <div id="login-step-1">
       <h1>Site Import Tool</h1>
-      <p style="color:var(--text2);font-size:13px;margin-bottom:0;">Melde dich mit deinem Salesforce Session-Token an — so geht's:</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:1.2rem;line-height:1.6;">Sign in automatically via Sitetracker — no manual steps needed:</p>
 
       <div class="guide-steps">
 
-        <!-- Step 1: F12 drücken -->
+        <!-- Step 1: Log in to Sitetracker -->
         <div class="guide-step">
           <div class="guide-step-num">1</div>
           <div class="guide-step-body">
@@ -295,96 +307,72 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
               </div>
               <div class="mock-toolbar-url">sitetracker-qwello.my.salesforce.com</div>
               <div class="mock-toolbar-ext">
-                <div style="background:var(--accent);color:#000;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;white-space:nowrap;">F12</div>
+                <div style="background:#27ae60;color:#fff;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;white-space:nowrap;">Logged in</div>
               </div>
             </div>
-            <div class="guide-step-label">Auf einer Salesforce-Seite in Chrome die Taste <strong>F12</strong> drücken (öffnet die Entwicklertools)</div>
+            <div class="guide-step-label">Make sure you are <strong>logged in to Sitetracker</strong> in this browser</div>
           </div>
         </div>
 
-        <!-- Step 2: Application → Cookies → sid -->
+        <!-- Step 2: Open the import tool link -->
         <div class="guide-step">
           <div class="guide-step-num">2</div>
           <div class="guide-step-body">
-            <div class="mock-popup" style="font-size:9px;">
-              <div style="display:flex;background:#1a1a1a;border-bottom:1px solid #2c2c2c;">
-                <div style="padding:5px 8px;color:#555;">Elements</div>
-                <div style="padding:5px 8px;color:#555;">Console</div>
-                <div style="padding:5px 8px;color:#555;">Network</div>
-                <div style="padding:5px 8px;color:var(--accent);font-weight:700;border-bottom:2px solid var(--accent);">Application</div>
-                <div style="padding:5px 8px;color:#555;">…</div>
+            <div class="mock-toolbar">
+              <div class="mock-toolbar-dots">
+                <div class="mock-toolbar-dot" style="background:#c0392b;"></div>
+                <div class="mock-toolbar-dot" style="background:#e67e22;"></div>
+                <div class="mock-toolbar-dot" style="background:#27ae60;"></div>
               </div>
-              <div style="display:flex;height:56px;">
-                <div style="width:110px;background:#141414;border-right:1px solid #2c2c2c;padding:6px 8px;display:flex;flex-direction:column;gap:3px;">
-                  <div style="color:#555;font-size:8px;">▸ Storage</div>
-                  <div style="color:#555;font-size:8px;">▾ Cookies</div>
-                  <div style="background:#2a2a2a;border-radius:3px;padding:2px 6px;font-size:8px;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">salesforce.com</div>
-                </div>
-                <div style="flex:1;padding:4px 8px;display:flex;flex-direction:column;gap:2px;">
-                  <div style="display:flex;gap:6px;border-bottom:1px solid #2c2c2c;padding-bottom:3px;">
-                    <span style="color:#555;width:24px;">Name</span><span style="color:#555;">Value</span>
-                  </div>
-                  <div style="display:flex;gap:6px;align-items:center;">
-                    <span style="color:#888;width:24px;">…</span><span style="color:#444;">…</span>
-                  </div>
-                  <div style="display:flex;gap:6px;align-items:center;background:#2a3a2a;border-radius:2px;padding:1px 3px;">
-                    <span style="color:var(--accent);font-weight:700;width:24px;">sid</span>
-                    <span style="color:#aaa;flex:1;white-space:nowrap;overflow:hidden;">00DWz…!ARsAQ…</span>
-                    <span style="color:var(--accent);font-size:8px;">← Copy</span>
-                  </div>
-                </div>
-              </div>
+              <div class="mock-toolbar-url">sitetracker-qwello.my.salesforce.com/apex/QwelloImport</div>
             </div>
-            <div class="guide-step-label">Tab <strong>"Application"</strong> → links "Cookies" aufklappen → salesforce.com klicken → Zeile <strong>"sid"</strong> suchen → Wert markieren und kopieren (Strg+A, Strg+C)</div>
-          </div>
-        </div>
-
-        <!-- Step 3: Einfügen -->
-        <div class="guide-step">
-          <div class="guide-step-num">3</div>
-          <div class="guide-step-body">
-            <div class="mock-paste-field">
-              <span class="mock-paste-label">Session Token</span>
-              <span class="mock-paste-value">00DWz000004j8Qj!ARsAQBnm…</span>
-              <div class="mock-paste-cursor"></div>
-            </div>
-            <div class="guide-step-label">Token unten einfügen <strong>(Strg+V&nbsp;/ Cmd+V)</strong> → <strong>Verbinden</strong> klicken</div>
+            <div class="guide-step-label">Open the <strong>Qwello Import</strong> page in Sitetracker — it will redirect here and sign you in automatically</div>
           </div>
         </div>
 
       </div>
 
-      <div class="field" style="margin-bottom:12px;text-align:left;">
+      <div style="margin:1rem 0 0.5rem;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);text-align:left;">
+        <p style="font-size:12px;color:var(--text3);margin:0;line-height:1.6;">Already signed in? <strong style="color:var(--text2);">Reload this page</strong> to restore your session. &nbsp;·&nbsp; Session ends when you close this tab.</p>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:16px 0 0;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:11px;color:var(--text3);">or enter token manually</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+
+      <div class="field" style="margin:12px 0;text-align:left;">
         <label for="token-input">Session Token</label>
         <input type="password" id="token-input" placeholder="00D…" autocomplete="off"
           onkeydown="if(event.key==='Enter')loginWithToken()"
           oninput="document.getElementById('token-error').style.display='none'">
-        <span id="token-error" style="font-size:11px;color:var(--error);display:none;margin-top:4px;">Token ungültig oder abgelaufen — bitte neuen Token kopieren.</span>
+        <span id="token-error" style="font-size:11px;color:var(--error);display:none;margin-top:4px;">Invalid or expired token — please try again.</span>
       </div>
 
       <button class="btn-login" id="token-btn" onclick="loginWithToken()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-        Verbinden
+        Connect
       </button>
 
       <div style="display:flex;align-items:center;gap:10px;margin:14px 0 0;">
         <div style="flex:1;height:1px;background:var(--border);"></div>
-        <span style="font-size:11px;color:var(--text3);">oder</span>
+        <span style="font-size:11px;color:var(--text3);">or</span>
         <div style="flex:1;height:1px;background:var(--border);"></div>
       </div>
       <button class="btn-login" onclick="startDemo()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border2);margin-top:10px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 8h.01M9 15l3-3 2 2 3-4"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
         Demo Mode
       </button>
-      <p class="login-note">Nur für Qwello-Mitarbeiter mit Salesforce-Zugang.<br>Kein SF Inspector? → IT fragen (kostenlose Chrome Extension).</p>
+      <p class="login-note">For Qwello staff with Salesforce access only.</p>
     </div>
   </div>
 </div>
 
 <!-- ═══ APP ══════════════════════════════════════════════════════════ -->
 <div id="session-expired-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:#fff;padding:12px 20px;display:none;align-items:center;justify-content:center;gap:16px;font-size:14px;font-weight:500;">
-  <span>⚠ Session abgelaufen — bitte neu anmelden.</span>
-  <button onclick="window.location.href=SF_DOMAIN+'/apex/QwelloImport'" style="background:#fff;color:#c0392b;border:none;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;font-size:13px;">Neu anmelden →</button>
+  <span>Session expired — please sign in again.</span>
+  <button onclick="window.location.href=SF_DOMAIN+'/apex/QwelloImport'" style="background:#fff;color:#c0392b;border:none;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;font-size:13px;">Sign in again →</button>
 </div>
 <div id="app-screen">
 
@@ -504,9 +492,9 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
               <input type="hidden" id="g-program-id">
               <div id="g-program-manual-wrap" style="display:none;margin-top:8px;">
                 <input type="text" id="g-program-manual" placeholder="Salesforce Program ID (a1o…)" autocomplete="off">
-                <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block;">ID aus der Salesforce URL kopieren</span>
+                <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block;">Copy the ID from the Salesforce URL</span>
               </div>
-              <span class="error-msg">Required — bitte Programm wählen</span>
+              <span class="error-msg">Required — please select a program</span>
             </div>
 
             <div></div>
@@ -882,7 +870,7 @@ async function loginWithToken() {
   } catch(e) {
     document.getElementById('token-error').style.display = 'block';
     btn.disabled = false;
-    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg> Verbinden';
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg> Connect';
   }
 }
 
@@ -954,6 +942,15 @@ async function initApp(token, instanceUrl, name) {
 }
 
 async function checkCallback() {
+  // Head script already stripped the hash and stored token in pending keys
+  const pending = sessionStorage.getItem('__sf_token_pending');
+  if (pending) {
+    const name = decodeURIComponent(sessionStorage.getItem('__sf_user_pending') || '');
+    sessionStorage.removeItem('__sf_token_pending');
+    sessionStorage.removeItem('__sf_user_pending');
+    await initApp(pending, SF_DOMAIN, name);
+    return;
+  }
   const existing = getToken();
   if (existing) await initApp(existing, getBase(), sessionStorage.getItem('sf_user') || '');
 }
@@ -1320,7 +1317,7 @@ async function loadLiveData() {
     }
   } catch(e) {
     console.error('[QwelloImport] loadLiveData Fehler:', e);
-    showNotif('Daten konnten nicht geladen werden — bitte Seite neu laden.', 'error');
+    showNotif('Failed to load data — please reload the page.', 'error');
   }
 }
 
