@@ -1556,10 +1556,13 @@ function searchCustomField(colIndex, query) {
     const q = query.toLowerCase();
     const matches = S.allFields.filter(f => f.label.toLowerCase().includes(q) || f.api.toLowerCase().includes(q)).slice(0,12);
     results.innerHTML = matches.length
-      ? matches.map(f => `<div class="cfs-item" onclick="selectCustomField(${colIndex},'${f.api}',${JSON.stringify(f.label)},'${f.type}')">
+      ? matches.map(f => {
+          const safeLabel = f.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          return `<div class="cfs-item" onclick="selectCustomField(${colIndex},'${f.api}','${safeLabel}','${f.type}')">
           <div class="cfs-label">${escHtml(f.label)}</div>
           <div class="cfs-api">${f.api}</div>
-        </div>`).join('')
+        </div>`;
+        }).join('')
       : '<div class="lookup-item-empty">No fields found</div>';
     results.classList.add('open');
     const input = document.getElementById(`cfs-input-${colIndex}`);
