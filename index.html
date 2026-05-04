@@ -318,15 +318,18 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <div class="guide-step">
           <div class="guide-step-num">2</div>
           <div class="guide-step-body">
-            <div class="mock-toolbar">
-              <div class="mock-toolbar-dots">
-                <div class="mock-toolbar-dot" style="background:#c0392b;"></div>
-                <div class="mock-toolbar-dot" style="background:#e67e22;"></div>
-                <div class="mock-toolbar-dot" style="background:#27ae60;"></div>
+            <a href="https://sitetracker-qwello.my.salesforce.com/apex/QwelloImport" target="_blank" style="text-decoration:none;display:block;">
+              <div class="mock-toolbar" style="cursor:pointer;transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <div class="mock-toolbar-dots">
+                  <div class="mock-toolbar-dot" style="background:#c0392b;"></div>
+                  <div class="mock-toolbar-dot" style="background:#e67e22;"></div>
+                  <div class="mock-toolbar-dot" style="background:#27ae60;"></div>
+                </div>
+                <div class="mock-toolbar-url" style="color:var(--accent);">sitetracker-qwello.my.salesforce.com/apex/QwelloImport</div>
+                <div style="color:var(--accent);font-size:9px;white-space:nowrap;">↗ Open</div>
               </div>
-              <div class="mock-toolbar-url">sitetracker-qwello.my.salesforce.com/apex/QwelloImport</div>
-            </div>
-            <div class="guide-step-label">Open the <strong>Qwello Import</strong> page in Sitetracker — it will redirect here and sign you in automatically</div>
+            </a>
+            <div class="guide-step-label">Click the link above — it will sign you in automatically</div>
           </div>
         </div>
 
@@ -337,25 +340,6 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
       </div>
 
       <div style="display:flex;align-items:center;gap:10px;margin:16px 0 0;">
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-        <span style="font-size:11px;color:var(--text3);">or enter token manually</span>
-        <div style="flex:1;height:1px;background:var(--border);"></div>
-      </div>
-
-      <div class="field" style="margin:12px 0;text-align:left;">
-        <label for="token-input">Session Token</label>
-        <input type="password" id="token-input" placeholder="00D…" autocomplete="off"
-          onkeydown="if(event.key==='Enter')loginWithToken()"
-          oninput="document.getElementById('token-error').style.display='none'">
-        <span id="token-error" style="font-size:11px;color:var(--error);display:none;margin-top:4px;">Invalid or expired token — please try again.</span>
-      </div>
-
-      <button class="btn-login" id="token-btn" onclick="loginWithToken()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
-        Connect
-      </button>
-
-      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 0;">
         <div style="flex:1;height:1px;background:var(--border);"></div>
         <span style="font-size:11px;color:var(--text3);">or</span>
         <div style="flex:1;height:1px;background:var(--border);"></div>
@@ -390,7 +374,6 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <div class="user-dot"></div>
         <span id="user-name">–</span>
       </div>
-      <button class="btn-logout" onclick="logout()">Sign out</button>
     </div>
   </div>
 
