@@ -405,22 +405,28 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
         <p>These values apply to every site in this import batch.</p>
       </div>
 
-      <div class="card">
-        <div class="card-header"><div class="card-icon">📋</div><span class="card-title">Batch Info</span></div>
-        <div class="card-body">
-          <div class="form-grid single">
-            <div class="field">
-              <label>Batch Name</label>
-              <input type="text" id="g-batch-name" placeholder="e.g. Munich April 2026">
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div class="card" style="overflow:visible;">
-        <div class="card-header"><div class="card-icon">🌍</div><span class="card-title">Location</span><span class="card-sub">Applies to all rows</span></div>
+        <div class="card-header"><div class="card-icon">👥</div><span class="card-title">Program &amp; Responsible Persons</span><span class="card-sub">Applies to all rows</span></div>
         <div class="card-body">
+
           <div class="form-grid">
+            <div class="field" id="gfield-program">
+              <label>Program <span class="req">*</span> <span id="program-status" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;"></span></label>
+              <div class="lookup-wrap">
+                <input type="text" id="g-program-search" class="lookup-input" placeholder="Search program…"
+                  oninput="filterPrograms(this.value)"
+                  onfocus="filterPrograms(this.value)"
+                  autocomplete="off">
+                <div class="lookup-results" id="g-program-results"></div>
+              </div>
+              <input type="hidden" id="g-program-id">
+              <div id="g-program-manual-wrap" style="display:none;margin-top:8px;">
+                <input type="text" id="g-program-manual" placeholder="Salesforce Program ID (a1o…)" autocomplete="off">
+                <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block;">Copy the ID from the Salesforce URL</span>
+              </div>
+              <span class="error-msg">Required — please select a program</span>
+            </div>
+
             <div class="field" id="gfield-country">
               <label>Country <span class="req">*</span></label>
               <div class="field-row">
@@ -434,6 +440,39 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
                 </button>
               </div>
               <span class="error-msg">Required</span>
+            </div>
+
+            <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-bottom:-4px;">
+              <input type="checkbox" id="show-hq-users" onchange="updateUsersByCountry(document.getElementById('g-country').value)" style="width:14px;height:14px;cursor:pointer;">
+              <label for="show-hq-users" style="font-size:12px;color:var(--text3);cursor:pointer;margin:0;">Show HQ Users</label>
+            </div>
+
+            <div class="field" id="gfield-sales">
+              <label>Sales Manager <span class="req">*</span></label>
+              <select id="g-sales-select" onchange="clearFieldError('gfield-sales')">
+                <option value="">— Select person —</option>
+              </select>
+              <span class="error-msg">Required</span>
+            </div>
+
+            <div class="field" id="gfield-pm">
+              <label>Project Manager <span class="req">*</span></label>
+              <select id="g-pm-select" onchange="clearFieldError('gfield-pm')">
+                <option value="">— Select person —</option>
+              </select>
+              <span class="error-msg">Required</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="overflow:visible;">
+        <div class="card-header"><div class="card-icon">📋</div><span class="card-title">Batch &amp; Location Details</span></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Batch Name</label>
+              <input type="text" id="g-batch-name" placeholder="e.g. Munich April 2026">
             </div>
 
             <div class="field" id="gfield-unicode">
@@ -452,54 +491,6 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
                 Open UNECE list for this country
               </a>
-              <span class="error-msg">Required</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="overflow:visible;">
-        <div class="card-header"><div class="card-icon">👥</div><span class="card-title">Program &amp; Responsible Persons</span><span class="card-sub">Applies to all rows</span></div>
-        <div class="card-body">
-
-          <div class="form-grid">
-            <div class="field" id="gfield-program">
-              <label>Program <span class="req">*</span> <span id="program-status" style="font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0;"></span></label>
-              <div class="lookup-wrap">
-                <input type="text" id="g-program-search" class="lookup-input" placeholder="Programm suchen…"
-                  oninput="filterPrograms(this.value)"
-                  onfocus="filterPrograms(this.value)"
-                  autocomplete="off">
-                <div class="lookup-results" id="g-program-results"></div>
-              </div>
-              <input type="hidden" id="g-program-id">
-              <div id="g-program-manual-wrap" style="display:none;margin-top:8px;">
-                <input type="text" id="g-program-manual" placeholder="Salesforce Program ID (a1o…)" autocomplete="off">
-                <span style="font-size:11px;color:var(--text3);margin-top:4px;display:block;">Copy the ID from the Salesforce URL</span>
-              </div>
-              <span class="error-msg">Required — please select a program</span>
-            </div>
-
-            <div></div>
-
-            <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-bottom:-4px;">
-              <input type="checkbox" id="show-hq-users" onchange="updateUsersByCountry(document.getElementById('g-country').value)" style="width:14px;height:14px;cursor:pointer;">
-              <label for="show-hq-users" style="font-size:12px;color:var(--text3);cursor:pointer;margin:0;">HQ-User einblenden</label>
-            </div>
-
-            <div class="field" id="gfield-sales">
-              <label>Sales Manager <span class="req">*</span></label>
-              <select id="g-sales-select" onchange="clearFieldError('gfield-sales')">
-                <option value="">— Person wählen —</option>
-              </select>
-              <span class="error-msg">Required</span>
-            </div>
-
-            <div class="field" id="gfield-pm">
-              <label>Project Manager <span class="req">*</span></label>
-              <select id="g-pm-select" onchange="clearFieldError('gfield-pm')">
-                <option value="">— Person wählen —</option>
-              </select>
               <span class="error-msg">Required</span>
             </div>
           </div>
@@ -1038,8 +1029,6 @@ function onCountryChange(val) {
 
   document.getElementById('g-unicode').value = '';
   document.getElementById('unicode-city-search').value = '';
-  document.getElementById('g-program-search').value = '';
-  document.getElementById('g-program-id').value = '';
   closeLookup('unicode-city');
   loadUnlocodeForCountry(val);
   updateUsersByCountry(val);
@@ -1213,22 +1202,37 @@ function filterPrograms(query) {
     const safePmName = (p.pmName || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     const safeSales = (p.sales || '').replace(/'/g,"\\'");
     const safeSalesName = (p.salesName || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}','${safeU}','${safePm}','${safeSales}','${safePmName}','${safeSalesName}')">
-      <div class="lookup-item-name">${escHtml(p.name)}${p.unlocode ? `<span style="color:var(--text3);font-size:10px;margin-left:6px;">${escHtml(p.unlocode)}</span>` : ''}</div>
+    const safeCountry = (p.country || '').replace(/'/g,"\\'");
+    return `<div class="lookup-item" onclick="selectProgram('${p.id}','${safe}','${safeU}','${safePm}','${safeSales}','${safePmName}','${safeSalesName}','${safeCountry}')">
+      <div class="lookup-item-name">${escHtml(p.name)}${p.unlocode ? `<span style="color:var(--text3);font-size:10px;margin-left:6px;">${escHtml(p.unlocode)}</span>` : ''}${p.country ? `<span style="color:var(--text3);font-size:10px;margin-left:6px;">· ${escHtml(p.country)}</span>` : ''}</div>
     </div>`;
   }).join('') +
   `<div class="lookup-item" style="border-top:1px solid var(--border);" onclick="showManualProgram()">
-    <div class="lookup-item-name" style="color:var(--text3);font-size:11px;">✏ ID manuell eingeben…</div>
+    <div class="lookup-item-name" style="color:var(--text3);font-size:11px;">✏ Enter ID manually…</div>
   </div>`;
   el.classList.add('open');
 }
 
-function selectProgram(id, name, unlocode, pm, sales, pmName, salesName) {
+function selectProgram(id, name, unlocode, pm, sales, pmName, salesName, country) {
   document.getElementById('g-program-search').value = name;
   document.getElementById('g-program-id').value = id;
   document.getElementById('g-program-results').classList.remove('open');
   document.getElementById('g-program-manual-wrap').style.display = 'none';
   clearFieldError('gfield-program');
+  if (country) {
+    const countrySel = document.getElementById('g-country');
+    if ([...countrySel.options].some(o => o.value === country)) {
+      countrySel.value = country;
+      clearFieldError('gfield-country');
+      // apply side effects (unlocode link + users) without resetting program
+      const link = document.getElementById('unicode-link');
+      const url  = UNECE_URLS[country];
+      if (url) { link.href = url; link.style.display = 'inline-flex'; }
+      else       link.style.display = 'none';
+      loadUnlocodeForCountry(country);
+      updateUsersByCountry(country);
+    }
+  }
   if (unlocode) {
     document.getElementById('g-unicode').value = unlocode;
     document.getElementById('unicode-city-search').value = name;
@@ -1295,7 +1299,7 @@ async function loadLiveData() {
     ]);
     const taggedUsers = users.map(u => ({ ...u, group: ROLE_COUNTRY[u.UserRole?.Name] || '' }));
     if (programs.length || taggedUsers.length) {
-      fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programme`);
+      fillDropdowns(programs, taggedUsers, `Live ✓ ${programs.length} Programs`);
       return;
     }
   } catch(e) {
