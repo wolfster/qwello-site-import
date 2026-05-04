@@ -217,7 +217,11 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .preview-table tr:hover td { background: #1e1e1e; }
 .preview-table tr.row-error td { background: rgba(224,82,82,0.05); }
 .preview-table tr.row-error td:nth-child(2) { border-left: 3px solid var(--error); }
-.row-num { color: var(--text3); font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 10px; padding: 4px 8px !important; text-align: right; min-width: 36px; }
+.row-num { color: var(--text3); font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 10px; padding: 4px 6px !important; text-align: right; width: 28px; min-width: 28px; max-width: 28px; }
+.add-col-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; background: var(--surface2); border: 1px dashed var(--border2); border-radius: var(--radius); color: var(--text3); font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+.add-col-btn:hover { border-color: var(--accent); color: var(--accent); }
+.add-col-panel { position: fixed; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-lg); z-index: 9999; padding: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); min-width: 260px; display: none; }
+.add-col-panel.open { display: block; }
 .cell-input { background: transparent; border: 1px solid transparent; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; width: 100%; min-width: 80px; padding: 4px 5px; outline: none; border-radius: 4px; transition: all 0.1s; }
 .cell-input:focus { background: var(--surface2); border-color: var(--accent); }
 .cell-input.cell-error { border-color: var(--error) !important; }
@@ -1536,11 +1540,11 @@ function renderMappingTable() {
   let html = '';
   if (lockedCount) html += `<thead><tr><td colspan="999" style="background:var(--surface2);padding:6px 12px;font-size:11px;color:var(--text3);border:1px solid var(--border);">` +
     `${lockedCount} Spalte${lockedCount>1?'n':''} wird aus Global Settings geschrieben; die gepasteten Werte darunter dienen nur zur Kontrolle.</td></tr></thead>`;
-  html += '<thead><tr><th style="width:30px;">#</th>';
+  html += '<thead><tr><th style="width:28px;min-width:28px;max-width:28px;">#</th>';
   S.rawHeaders.forEach(h => { html += `<th><div class="col-original">${escHtml(h)}</div></th>`; });
   html += '</tr></thead><tbody>';
   // Mapping selects row
-  html += '<tr style="background:var(--bg);"><td style="font-size:10px;color:var(--text3);padding:8px;text-align:right;">Field</td>';
+  html += '<tr style="background:var(--bg);"><td style="width:28px;min-width:28px;max-width:28px;padding:4px 6px;"></td>';
   S.rawHeaders.forEach((_, i) => {
     const m = S.mapping[i];
     if (m.lockedByGlobal) {
@@ -1730,11 +1734,19 @@ function renderPreviewTable() {
     ? `<div class="warning-box">⚠ <strong>${errorRows.length} row${errorRows.length>1?'s have':' has'} validation issues.</strong> Red cells must be fixed. You can edit them directly in the table below.</div>`
     : '';
 
-  let html = '<table class="preview-table"><thead><tr><th style="width:36px;">#</th>';
+  let html = '<table class="preview-table"><thead><tr><th style="width:28px;min-width:28px;max-width:28px;">#</th>';
   mapped.forEach(m => {
     const isReq = FIELDS.find(f => f.api === m.api)?.required;
     html += `<th class="${isReq?'req-col':''}">${escHtml(m.label)}<button class="fill-btn" id="fillbtn-${m.api}" onclick="fillDown('${m.api}')" title="Fill all rows with value from row 1">↓ Fill all</button></th>`;
   });
+  html += `<th style="background:var(--bg);border:none;vertical-align:middle;padding:6px 8px;">
+    <button class="add-col-btn" onclick="openAddColPanel(this)" title="Add a new field column">+ Field</button>
+    <div class="add-col-panel" id="add-col-panel">
+      <div style="font-size:11px;color:var(--text2);font-weight:600;margin-bottom:8px;">Add column</div>
+      <input class="cfs-input" id="add-col-input" placeholder="Search field…" oninput="searchAddCol(this.value)" autocomplete="off" style="width:100%;">
+      <div class="cfs-results" id="add-col-results" style="position:static;display:block;max-height:180px;margin-top:6px;box-shadow:none;border-color:var(--border);"></div>
+    </div>
+  </th>`;
   html += '</tr></thead><tbody>';
 
   S.rows.forEach((row, ri) => {
@@ -1754,7 +1766,7 @@ function renderPreviewTable() {
         html += `<td><input type="${inputType}" class="cell-input ${cls}" value="${escHtml(val)}" oninput="updateCell(${ri},'${m.api}',this.value)"></td>`;
       }
     });
-    html += '</tr>';
+    html += '<td style="background:var(--bg);border:none;"></td></tr>';
   });
   html += '</tbody></table>';
   document.getElementById('preview-wrap').innerHTML = html;
@@ -1769,6 +1781,54 @@ function updateCell(rowIndex, api, value) {
   const input = tr?.querySelector(`[oninput*="'${api}'"], [onchange*="'${api}'"]`);
   if (input) input.classList.toggle('cell-error', S.rows[rowIndex].errors.some(e => e.api === api));
 }
+
+function openAddColPanel(btn) {
+  const panel = document.getElementById('add-col-panel');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    const rect = btn.getBoundingClientRect();
+    panel.style.top  = (rect.bottom + 4) + 'px';
+    panel.style.left = Math.min(rect.left, window.innerWidth - 280) + 'px';
+    panel.style.position = 'fixed';
+    setTimeout(() => document.getElementById('add-col-input')?.focus(), 50);
+  }
+}
+function searchAddCol(query) {
+  const results = document.getElementById('add-col-results');
+  if (!results) return;
+  const q = query.toLowerCase();
+  const usedApis = new Set(S.mapping.map(m => m.api));
+  const pool = [...FIELDS, ...S.allFields].filter((f, i, arr) => arr.findIndex(x => x.api === f.api) === i);
+  const matches = (q.length < 1 ? pool : pool.filter(f => f.label.toLowerCase().includes(q) || f.api.toLowerCase().includes(q)))
+    .filter(f => !usedApis.has(f.api) && !GLOBAL_APIS.has(f.api))
+    .slice(0, 12);
+  results.innerHTML = matches.length
+    ? matches.map(f => {
+        const safe = f.label.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        return `<div class="cfs-item" onclick="addColumn('${f.api}','${safe}','${f.type||'text'}')">
+          <div class="cfs-label">${escHtml(f.label)}</div>
+          <div class="cfs-api">${f.api}</div>
+        </div>`;
+      }).join('')
+    : '<div class="lookup-item-empty">No fields found</div>';
+}
+function addColumn(api, label, sfType) {
+  document.getElementById('add-col-panel')?.classList.remove('open');
+  document.getElementById('add-col-input').value = '';
+  const type = mapSfType(sfType);
+  const colIndex = S.mapping.length;
+  S.mapping.push({ colIndex, api, label, type, custom: true, added: true });
+  S.rows.forEach(row => { row.cells[api] = ''; row.errors = validateRow(row.cells); });
+  renderPreviewTable();
+  showNotif(`Column "${label}" added`, 'success');
+}
+document.addEventListener('click', e => {
+  const panel = document.getElementById('add-col-panel');
+  if (panel && !panel.contains(e.target) && !e.target.classList.contains('add-col-btn')) {
+    panel.classList.remove('open');
+  }
+});
 
 function fillDown(api) {
   if (!S.rows.length) return;
