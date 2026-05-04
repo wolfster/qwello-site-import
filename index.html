@@ -517,7 +517,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
     <div class="screen" id="screen-2">
       <div class="page-header">
         <h2>Paste Data</h2>
-        <p>Copy your Excel table and paste it here. The first row is used as column headers.</p>
+        <p>Paste an Excel table or upload a previously downloaded CSV file.</p>
       </div>
 
       <div class="card">
@@ -529,6 +529,19 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
             </div>
             <div class="paste-stats" id="paste-stats" style="display:none;"></div>
             <textarea id="paste-input" onpaste="setTimeout(()=>handlePaste(this.value),10)" oninput="handlePaste(this.value)" autocomplete="off" spellcheck="false"></textarea>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
+            <div style="flex:1;height:1px;background:var(--border);"></div>
+            <span style="font-size:11px;color:var(--text3);">or upload a CSV file</span>
+            <div style="flex:1;height:1px;background:var(--border);"></div>
+          </div>
+          <div style="margin-top:12px;text-align:center;">
+            <label style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;text-transform:none;letter-spacing:0;" onmouseover="this.style.borderColor='var(--text3)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+              Upload CSV
+              <input type="file" accept=".csv" style="display:none;" onchange="handleCsvUpload(this.files[0]);this.value='';">
+            </label>
+            <p style="margin-top:8px;font-size:11px;color:var(--text3);">Accepts CSV files previously downloaded from this tool</p>
           </div>
         </div>
       </div>
@@ -1380,6 +1393,42 @@ function goToStep(n) {
 // ════════════════════════════════════════════════════════════
 // STEP 2 — PASTE PARSER
 // ════════════════════════════════════════════════════════════
+function handleCsvUpload(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    // Parse CSV: handles quoted fields with commas/newlines inside
+    function parseCsvLine(line) {
+      const cells = []; let cur = ''; let inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (inQ) {
+          if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
+          else if (c === '"') inQ = false;
+          else cur += c;
+        } else {
+          if (c === '"') inQ = true;
+          else if (c === ',') { cells.push(cur); cur = ''; }
+          else cur += c;
+        }
+      }
+      cells.push(cur);
+      return cells;
+    }
+    const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) { showNotif('CSV must have at least a header row and one data row', 'error'); return; }
+    const headers = parseCsvLine(lines[0]);
+    const rows = lines.slice(1).map(parseCsvLine);
+    // Feed into existing pipeline via tab-format
+    const tsv = [headers, ...rows].map(r => r.join('\t')).join('\n');
+    document.getElementById('paste-input').value = tsv;
+    handlePaste(tsv);
+    showNotif(`CSV loaded: ${rows.length} rows, ${headers.length} columns`, 'success');
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
 function handlePaste(raw) {
   if (!raw.trim()) { clearPasteState(); return; }
   const lines = raw.trim().split(/\r?\n/).filter(l => l.trim());
