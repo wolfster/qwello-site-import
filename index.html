@@ -111,6 +111,9 @@ body { background: var(--bg); color: var(--text); font-family: -apple-system, Bl
 
 /* ── MAIN ── */
 .main { max-width: 980px; margin: 0 auto; padding: 2.5rem 2rem; }
+.main:has(#screen-3.active) { max-width: none; }
+#screen-3 .page-header,
+#screen-3 .actions-bar { max-width: 980px; margin-left: auto; margin-right: auto; }
 .screen { display: none; }
 .screen.active { display: block; }
 .page-header { margin-bottom: 2rem; }
@@ -1460,7 +1463,7 @@ function detectHasHeader(lines) {
   if (firstRow.some(v => allPicklistVals.has(v))) {
     return { hasHeader: false, reason: 'auto-detected: first row looks like data (known field values)' };
   }
-  if (firstRow.some(v => v.length > 3 && /\d/.test(v) && /[a-zA-ZäöüÄÖÜß]{2,}/.test(v))) {
+  if (firstRow.some(v => v.length > 3 && !/__/.test(v) && /\d/.test(v) && /[a-zA-ZäöüÄÖÜß]{2,}/.test(v))) {
     return { hasHeader: false, reason: 'auto-detected: first row looks like data (mixed text/numbers)' };
   }
   return { hasHeader: true, reason: 'auto-detected: first row looks like headers' };
