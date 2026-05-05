@@ -669,7 +669,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeConfirmModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="runImport()">
+      <button class="btn btn-primary" id="btn-confirm-import" onclick="runImport()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         Import now
       </button>
@@ -1801,6 +1801,12 @@ function validateRow(cells) {
       if (cells[m.api] !== undefined && cells[m.api] !== '' && isNaN(Number(cells[m.api])))
         errors.push({ api: m.api, msg: `${fd?.label || m.label || m.api} must be a number` });
     }
+    if (effectiveType === 'picklist') {
+      const plVals = getPicklistValues(m.api);
+      const val = cells[m.api];
+      if (plVals && val && !plVals.includes(val))
+        errors.push({ api: m.api, msg: `"${val}" is not a valid value for ${fd?.label || m.api}` });
+    }
   });
   return errors;
 }
@@ -1984,9 +1990,17 @@ function openConfirmModal() {
     <span class="summary-label">Sales Manager</span><span class="summary-value">${escHtml(salesName)}</span>
     <span class="summary-label">Project Manager</span><span class="summary-value">${escHtml(pmName)}</span>`;
 
-  document.getElementById('confirm-warnings').innerHTML = errorCount
-    ? `<div class="warning-box">⚠ <strong>${errorCount} row${errorCount>1?'s have':' has'} validation issues.</strong><br>They will still be sent — Salesforce will report success or error per row.</div>`
-    : '';
+  const confirmBtn = document.getElementById('btn-confirm-import');
+  if (errorCount) {
+    document.getElementById('confirm-warnings').innerHTML =
+      `<div class="warning-box" style="border-color:var(--error);background:rgba(224,82,82,0.06);">` +
+      `⛔ <strong>${errorCount} row${errorCount>1?'s have':' has'} validation errors.</strong><br>` +
+      `Fix all red cells in the table before importing — Sitetracker will reject invalid picklist values.</div>`;
+    if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.style.opacity = '0.4'; confirmBtn.style.cursor = 'not-allowed'; }
+  } else {
+    document.getElementById('confirm-warnings').innerHTML = '';
+    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.style.opacity = ''; confirmBtn.style.cursor = ''; }
+  }
 
   document.getElementById('confirm-modal').classList.add('open');
 }
