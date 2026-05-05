@@ -190,6 +190,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .mapping-table th, .mapping-table td { padding: 8px 10px; text-align: left; border: 1px solid var(--border); min-width: 180px; }
 .mapping-table thead th { background: var(--surface2); color: var(--text2); font-size: 11px; font-weight: 500; }
 .mapping-table tbody td { background: var(--surface); font-size: 12px; }
+.mapping-table th:first-child, .mapping-table td:first-child { min-width: 0; width: 28px; max-width: 32px; text-align: center; padding: 6px 4px; }
 .col-original { font-family: 'SF Mono', 'Consolas', 'Monaco', monospace; font-size: 11px; color: var(--accent); }
 .col-preview { color: var(--text3); font-size: 11px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .global-cell { font-size: 11px; padding: 7px 8px; background: rgba(76,175,136,0.12); border: 1px solid var(--success); border-radius: var(--radius); color: var(--success); line-height: 1.35; }
@@ -228,6 +229,8 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .cell-select { background: transparent; border: 1px solid transparent; color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 12px; width: 100%; min-width: 120px; padding: 4px 22px 4px 5px; outline: none; cursor: pointer; -webkit-appearance: none; border-radius: 4px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; }
 .cell-select:focus { background-color: var(--surface2); border-color: var(--accent); }
 .cell-select.cell-error { border-color: var(--error) !important; }
+.opt-invalid { color: var(--error); font-style: italic; }
+.cell-input[type="date"] { min-width: 130px; max-width: 140px; }
 
 /* ── FILL DOWN ── */
 .fill-btn { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 5px; background: var(--surface); border: 1px solid var(--border2); border-radius: 4px; color: var(--text3); font-size: 9px; font-weight: 600; cursor: pointer; vertical-align: middle; transition: all 0.12s; white-space: nowrap; }
@@ -534,6 +537,13 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
             <div class="paste-stats" id="paste-stats" style="display:none;"></div>
             <textarea id="paste-input" onpaste="setTimeout(()=>handlePaste(this.value),10)" oninput="handlePaste(this.value)" autocomplete="off" spellcheck="false"></textarea>
           </div>
+          <div id="header-toggle" style="display:none; margin-top:10px; align-items:center; gap:10px; font-size:12px; color:var(--text2);">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;">
+              <input type="checkbox" id="has-header-cb" onchange="toggleHeader(this.checked)" style="width:14px;height:14px;cursor:pointer;">
+              First row is header
+            </label>
+            <span id="header-detect-hint" style="color:var(--text3);font-size:11px;"></span>
+          </div>
           <div style="display:flex;align-items:center;gap:10px;margin-top:14px;">
             <div style="flex:1;height:1px;background:var(--border);"></div>
             <span style="font-size:11px;color:var(--text3);">or upload a CSV file</span>
@@ -829,6 +839,8 @@ const S = {
   allFields:       [],
   rawHeaders:      [],
   rawRows:         [],
+  rawPaste:        '',
+  hasHeader:       true,
   mapping:         [],
   rows:            [],
   importResults:   [],
@@ -1004,7 +1016,12 @@ async function loadCountries(force = false) {
     // Cache all updateable fields for custom mapping
     S.allFields = desc.fields
       .filter(x => x.updateable && x.name !== 'Id' && !GLOBAL_APIS.has(x.name))
-      .map(x => ({ api: x.name, label: x.label, type: x.type }));
+      .map(x => ({
+        api: x.name, label: x.label, type: x.type,
+        picklistValues: (x.type === 'picklist' || x.type === 'multipicklist')
+          ? x.picklistValues.filter(v => v.active).map(v => v.value)
+          : undefined
+      }));
     sessionStorage.setItem('sf_all_fields', JSON.stringify(S.allFields));
     if (force) showNotif('Countries updated ✓', 'success');
   } catch(e) {
@@ -1433,32 +1450,85 @@ function handleCsvUpload(file) {
   reader.readAsText(file, 'UTF-8');
 }
 
-function handlePaste(raw) {
-  if (!raw.trim()) { clearPasteState(); return; }
-  const lines = raw.trim().split(/\r?\n/).filter(l => l.trim());
-  if (lines.length < 2) { showNotif('Need at least 2 rows (header + data)', 'error'); return; }
+function detectHasHeader(lines) {
   const parse = line => line.split('\t').map(c => c.trim().replace(/^"|"$/g,''));
-  S.rawHeaders = parse(lines[0]);
-  S.rawRows    = lines.slice(1).map(parse);
+  const firstRow = parse(lines[0]);
+  if (firstRow.some(v => /^[a-zA-Z0-9]{15,18}$/.test(v) && /^[a-zA-Z0-9]{3}[A-Z0-9]/.test(v) && /[A-Z]/.test(v) && /[0-9]/.test(v))) {
+    return { hasHeader: false, reason: 'auto-detected: first row looks like data (Salesforce IDs)' };
+  }
+  const allPicklistVals = new Set(Object.values(PICKLISTS).flat());
+  if (firstRow.some(v => allPicklistVals.has(v))) {
+    return { hasHeader: false, reason: 'auto-detected: first row looks like data (known field values)' };
+  }
+  if (firstRow.some(v => v.length > 3 && /\d/.test(v) && /[a-zA-ZäöüÄÖÜß]{2,}/.test(v))) {
+    return { hasHeader: false, reason: 'auto-detected: first row looks like data (mixed text/numbers)' };
+  }
+  return { hasHeader: true, reason: 'auto-detected: first row looks like headers' };
+}
+
+function applyParse() {
+  const raw = S.rawPaste;
+  if (!raw.trim()) return;
+  const lines = raw.trim().split(/\r?\n/).filter(l => l.trim());
+  const parse = line => line.split('\t').map(c => c.trim().replace(/^"|"$/g,''));
+  if (S.hasHeader) {
+    if (lines.length < 2) { showNotif('Need at least 2 rows (header + data)', 'error'); return; }
+    S.rawHeaders = parse(lines[0]);
+    S.rawRows    = lines.slice(1).map(parse);
+  } else {
+    S.rawRows    = lines.map(parse);
+    S.rawHeaders = S.rawRows[0].map((_, i) => `Column ${i + 1}`);
+  }
+  buildAutoMapping();
   document.getElementById('paste-area').classList.add('has-data');
   document.getElementById('paste-hint').innerHTML =
     `<span style="color:var(--success);font-size:22px;">✓</span><br><strong style="color:var(--text);">${S.rawRows.length} rows ready</strong>`;
   const stats = document.getElementById('paste-stats');
   stats.style.display = 'flex';
   stats.innerHTML = `<span class="stat-badge">${S.rawRows.length} rows</span><span class="stat-badge">${S.rawHeaders.length} columns</span>` +
-    S.rawHeaders.map(h => `<span class="stat-badge" style="color:var(--text3);">${escHtml(h)}</span>`).join('');
+    (S.hasHeader ? S.rawHeaders.map(h => `<span class="stat-badge" style="color:var(--text3);">${escHtml(h)}</span>`).join('') : '');
   document.getElementById('btn-to-mapping').disabled = false;
-  buildAutoMapping();
 }
+
+function handlePaste(raw) {
+  if (!raw.trim()) { clearPasteState(); return; }
+  const lines = raw.trim().split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 1) return;
+  const isNew = raw.trim() !== S.rawPaste.trim();
+  S.rawPaste = raw;
+  if (isNew) {
+    const detected = detectHasHeader(lines);
+    S.hasHeader = detected.hasHeader;
+    const hint = document.getElementById('header-detect-hint');
+    if (hint) hint.textContent = detected.reason;
+  }
+  const cb = document.getElementById('has-header-cb');
+  const toggleWrap = document.getElementById('header-toggle');
+  if (cb) cb.checked = S.hasHeader;
+  if (toggleWrap) toggleWrap.style.display = 'flex';
+  applyParse();
+}
+
+function toggleHeader(checked) {
+  S.hasHeader = checked;
+  const lines = S.rawPaste.trim().split(/\r?\n/).filter(l => l.trim());
+  const detected = detectHasHeader(lines);
+  const hint = document.getElementById('header-detect-hint');
+  if (hint) hint.textContent = (S.hasHeader === detected.hasHeader) ? detected.reason : '(manually set)';
+  applyParse();
+}
+
 function clearPaste() {
   document.getElementById('paste-input').value = '';
   clearPasteState();
 }
 function clearPasteState() {
-  S.rawHeaders = []; S.rawRows = []; S.mapping = [];
+  S.rawHeaders = []; S.rawRows = []; S.mapping = []; S.rawPaste = ''; S.hasHeader = true;
   document.getElementById('paste-area').classList.remove('has-data');
   document.getElementById('paste-hint').innerHTML = '<strong>Paste Excel table here</strong><br>Select your table in Excel → click here → Ctrl+V / ⌘+V';
   document.getElementById('paste-stats').style.display = 'none';
+  const toggleWrap = document.getElementById('header-toggle');
+  if (toggleWrap) toggleWrap.style.display = 'none';
   document.getElementById('btn-to-mapping').disabled = true;
 }
 
@@ -1536,15 +1606,29 @@ function globalFieldValue(api) {
 }
 function renderMappingTable() {
   const previews = S.rawRows.slice(0,MAPPING_PREVIEW_ROW_LIMIT);
-  const lockedCount = S.mapping.filter(m => m.lockedByGlobal).length;
+  const lockedInTable = new Set(S.mapping.filter(m => m.lockedByGlobal).map(m => m.api));
+  // Virtual global columns: globals not already present as a locked column in the pasted table
+  const virtualGlobals = GLOBAL_FIELDS.filter(f => !lockedInTable.has(f.api));
+  const totalLocked = lockedInTable.size + virtualGlobals.length;
   let html = '';
-  if (lockedCount) html += `<thead><tr><td colspan="999" style="background:var(--surface2);padding:6px 12px;font-size:11px;color:var(--text3);border:1px solid var(--border);">` +
-    `${lockedCount} Spalte${lockedCount>1?'n':''} wird aus Global Settings geschrieben; die gepasteten Werte darunter dienen nur zur Kontrolle.</td></tr></thead>`;
+  if (totalLocked) html += `<thead><tr><td colspan="999" style="background:var(--surface2);padding:6px 12px;font-size:11px;color:var(--text3);border:1px solid var(--border);">` +
+    `${totalLocked} Global-Feld${totalLocked>1?'er':''} werden automatisch aus den Global Settings übernommen und müssen nicht in der Tabelle enthalten sein.</td></tr></thead>`;
   html += '<thead><tr><th style="width:28px;min-width:28px;max-width:28px;">#</th>';
+  // Virtual global column headers first
+  virtualGlobals.forEach(f => { html += `<th><div class="col-original" style="color:var(--success);opacity:0.7;">${escHtml(f.api)}</div></th>`; });
   S.rawHeaders.forEach(h => { html += `<th><div class="col-original">${escHtml(h)}</div></th>`; });
   html += '</tr></thead><tbody>';
   // Mapping selects row
   html += '<tr style="background:var(--bg);"><td style="width:28px;min-width:28px;max-width:28px;padding:4px 6px;"></td>';
+  // Virtual global cells first
+  virtualGlobals.forEach(f => {
+    html += `<td style="vertical-align:top;">
+      <div class="global-cell">
+        <div class="global-cell-label">✓ ${escHtml(f.label)} from Global Settings</div>
+        <div class="global-cell-value">${escHtml(globalFieldValue(f.api) || 'Not set')}</div>
+      </div>
+    </td>`;
+  });
   S.rawHeaders.forEach((_, i) => {
     const m = S.mapping[i];
     if (m.lockedByGlobal) {
@@ -1567,11 +1651,13 @@ function renderMappingTable() {
     </td>`;
   });
   html += '</tr>';
-  // Preview rows
-  // Pre-compute which columns are entirely empty
+  // Preview rows — virtual globals show the global value greyed out
   const emptyCol = S.rawHeaders.map((_, ci) => S.rawRows.every(r => !r[ci]?.trim()));
   previews.forEach((row, ri) => {
     html += `<tr><td class="row-num" style="padding:6px 8px;">${ri+1}</td>`;
+    virtualGlobals.forEach(f => {
+      html += `<td class="col-preview" style="color:var(--text3);font-style:italic;">${escHtml(globalFieldValue(f.api) || '')}</td>`;
+    });
     S.rawHeaders.forEach((_, ci) => {
       const v = row[ci] || '';
       html += emptyCol[ci] && ri === 0
@@ -1665,7 +1751,15 @@ function selectCustomField(colIndex, api, label, sfType) {
   document.getElementById(`ref-warn-${colIndex}`).style.display = isRef ? 'block' : 'none';
 }
 function mapSfType(sfType) {
-  return { string:'text', textarea:'text', double:'number', int:'number', currency:'number', percent:'number', date:'date', datetime:'date', picklist:'text', multipicklist:'text', reference:'text', id:'text' }[sfType] || 'text';
+  return { string:'text', textarea:'text', double:'number', int:'number', currency:'number', percent:'number', date:'date', datetime:'date', picklist:'picklist', multipicklist:'text', reference:'text', id:'text' }[sfType] || 'text';
+}
+function findField(api) {
+  return FIELDS.find(f => f.api === api) || S.allFields.find(f => f.api === api) || null;
+}
+function getPicklistValues(api) {
+  if (PICKLISTS[api]) return PICKLISTS[api];
+  const sf = S.allFields.find(f => f.api === api);
+  return sf?.picklistValues || null;
 }
 
 function applyMappingAndNext() {
@@ -1692,13 +1786,18 @@ function buildPreviewRows() {
 }
 function validateRow(cells) {
   const errors = [];
-  const mappedApis = new Set(S.mapping.filter(m => m.api && m.api !== '__skip__' && !m.lockedByGlobal).map(m => m.api));
+  const activeMappings = S.mapping.filter(m => m.api && m.api !== '__skip__' && !m.lockedByGlobal);
+  const mappedApis = new Set(activeMappings.map(m => m.api));
   FIELDS.filter(f => f.required && mappedApis.has(f.api)).forEach(f => {
     if (!cells[f.api] || !String(cells[f.api]).trim()) errors.push({ api:f.api, msg:`${f.label} is required` });
   });
-  ['sitetracker__Lat__c','sitetracker__Long__c','Location_Concept_Score__c','Number_of_poles__c','Sidewalk_width__c','Parking_space_length__c','Parking_space_width__c'].forEach(api => {
-    if (cells[api] !== undefined && cells[api] !== '' && isNaN(Number(cells[api])))
-      errors.push({ api, msg:`${FIELDS.find(f=>f.api===api)?.label||api} must be a number` });
+  activeMappings.forEach(m => {
+    const fd = findField(m.api);
+    const effectiveType = fd?.type || m.type || 'text';
+    if (['number','double','int','currency','percent'].includes(effectiveType)) {
+      if (cells[m.api] !== undefined && cells[m.api] !== '' && isNaN(Number(cells[m.api])))
+        errors.push({ api: m.api, msg: `${fd?.label || m.label || m.api} must be a number` });
+    }
   });
   return errors;
 }
@@ -1737,7 +1836,8 @@ function renderPreviewTable() {
   let html = '<table class="preview-table"><thead><tr><th style="width:28px;min-width:28px;max-width:28px;">#</th>';
   mapped.forEach(m => {
     const isReq = FIELDS.find(f => f.api === m.api)?.required;
-    html += `<th class="${isReq?'req-col':''}">${escHtml(m.label)}<button class="fill-btn" id="fillbtn-${m.api}" onclick="fillDown('${m.api}')" title="Fill all rows with value from row 1">↓ Fill all</button></th>`;
+    const row0val = S.rows[0]?.cells[m.api] ?? '';
+    html += `<th class="${isReq?'req-col':''}">${escHtml(m.label)}<button class="fill-btn" id="fillbtn-${m.api}" onclick="fillDown('${m.api}')" title="Fill all with: ${escHtml(row0val) || '(empty)'}">↓ Fill all</button></th>`;
   });
   html += `<th style="background:var(--bg);border:none;vertical-align:middle;padding:6px 8px;">
     <button class="add-col-btn" onclick="openAddColPanel(this)" title="Add a new field column">+ Field</button>
@@ -1754,15 +1854,22 @@ function renderPreviewTable() {
     mapped.forEach(m => {
       const val = row.cells[m.api] ?? '';
       const hasErr = row.errors.some(e => e.api === m.api);
-      const cls = hasErr ? 'cell-error' : '';
-      const fd  = FIELDS.find(f => f.api === m.api);
-      if (fd?.type === 'picklist' && PICKLISTS[m.api]) {
-        const opts = ['', ...PICKLISTS[m.api]].map(v => `<option${v===val?' selected':''}>${escHtml(v)}</option>`).join('');
+      const fd = findField(m.api);
+      const effectiveType = fd?.type || m.type || 'text';
+      const plVals = getPicklistValues(m.api);
+      if (effectiveType === 'picklist' && plVals) {
+        const isInvalid = val !== '' && !plVals.includes(val);
+        const cls = (hasErr || isInvalid) ? 'cell-error' : '';
+        let opts = `<option value="">— empty —</option>`;
+        if (isInvalid) opts += `<option value="${escHtml(val)}" selected class="opt-invalid">⚠ ${escHtml(val)}</option>`;
+        opts += plVals.map(v => `<option value="${escHtml(v)}"${v===val?' selected':''}>${escHtml(v)}</option>`).join('');
         html += `<td><select class="cell-select ${cls}" onchange="updateCell(${ri},'${m.api}',this.value)">${opts}</select></td>`;
-      } else if (fd?.type === 'date') {
+      } else if (effectiveType === 'date') {
+        const cls = hasErr ? 'cell-error' : '';
         html += `<td><input type="date" class="cell-input ${cls}" value="${escHtml(val)}" onchange="updateCell(${ri},'${m.api}',this.value)"></td>`;
       } else {
-        const inputType = fd?.type === 'number' ? 'number' : 'text';
+        const cls = hasErr ? 'cell-error' : '';
+        const inputType = ['number','double','int','currency','percent'].includes(effectiveType) ? 'number' : 'text';
         html += `<td><input type="${inputType}" class="cell-input ${cls}" value="${escHtml(val)}" oninput="updateCell(${ri},'${m.api}',this.value)"></td>`;
       }
     });
@@ -1967,7 +2074,7 @@ function downloadRetryCsv() {
 function today() { return new Date().toISOString().slice(0,10); }
 
 function startNewBatch() {
-  Object.assign(S, { rawHeaders:[], rawRows:[], mapping:[], rows:[], importResults:[] });
+  Object.assign(S, { rawHeaders:[], rawRows:[], rawPaste:'', hasHeader:true, mapping:[], rows:[], importResults:[] });
   clearPasteState();
   goToStep(1);
 }
